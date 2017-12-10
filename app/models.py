@@ -2,6 +2,7 @@ from app import db
 
 class Customer(db.Model):
     '''A customer of the system'''
+    __tablename__ = 'customer'
     id = db.Column(db.Integer, primary_key=True)
     firstname = db.Column(db.String(64), index=True, unique=False)
     lastname = db.Column(db.String(64), index=True, unique=False)
@@ -12,7 +13,18 @@ class Customer(db.Model):
     def __repr__(self):
         return '<User %r %r>' % (self.firstname, self.lastname)
 
-orders_to_slots_table = db.Table('orders_to_slots', db.Model.metadata,
+    @property
+    def serialize(self):
+        return {
+            'id': self.id,
+            'firstname': self.firstname,
+            'lastname': self.lastname,
+            'phone': self.phone,
+            'email': self.email 
+        }
+
+Orders2Slots = db.Table('orders_to_slots',
+    db.Column('id', db.Integer, primary_key=True),
     db.Column('order_id', db.Integer, db.ForeignKey('order.id')),
     db.Column('timeslot_id', db.Integer, db.ForeignKey('timeslot.id'))
 )
@@ -23,10 +35,10 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'))
     # TODO - allow different payer than customer
-    slots = db.relationship('TimeSlot', secondary=orders_to_slots_table)
+    slots = db.relationship('TimeSlot', secondary=Orders2Slots, backref='Order')
 
     def __repr__(self):
-        return '<Order %r>'
+        return '<Order c=%d>' % (self.customer_id)
 
 class TimeSlot(db.Model):
     '''An available timeslot for a lesson'''
@@ -39,4 +51,3 @@ class TimeSlot(db.Model):
 
     def __repr__(self):
         return 'Slot< %d, capacity=%d>' % (self.id, self.capacity)
-
