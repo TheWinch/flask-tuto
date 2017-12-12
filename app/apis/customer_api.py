@@ -38,7 +38,7 @@ class CustomerList(Resource):
         parser.add_argument('name', action='append')
         args = parser.parse_args()
         if args['name'] is not None:
-            return DAO.getByNameOrEmail(args['name'])
+            return DAO.getByNameOrEmail(args['name']), 200, {'Access-Control-Allow-Origin':'*'}
         return DAO.getAll(), 200, {'Access-Control-Allow-Origin':'*'}
 
 @ns.route('/<int:id>', endpoint='customer_ep')

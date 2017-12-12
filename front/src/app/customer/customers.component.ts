@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 
 import { Observable } from 'rxjs/Observable';
+import { concat } from 'rxjs/observable/concat';
 import { Subject }    from 'rxjs/Subject';
-import { of }         from 'rxjs/observable/of';
  
 import {
    debounceTime, distinctUntilChanged, switchMap
@@ -37,7 +37,9 @@ export class CustomersComponent implements OnInit {
   }
 
   getCustomers(): void {
-    this.customers$ = this.searchTerms.pipe(
+     this.customers$ = concat(
+        this.customerService.getCustomers(),
+        this.searchTerms.pipe(
       // wait 300ms after each keystroke before considering the term
       debounceTime(300),
  
@@ -45,9 +47,7 @@ export class CustomersComponent implements OnInit {
       distinctUntilChanged(),
  
       // switch to new search observable each time the term changes
-      switchMap((term: string) => this.customerService.searchCustomers(term)),
-    );
-    //this.customerService.getCustomers()
-    //    .subscribe(customers => this.customers = customers);
+      switchMap((term: string) => this.customerService.searchCustomers(term))
+    ));
   }
 }

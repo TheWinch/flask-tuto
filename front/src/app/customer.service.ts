@@ -9,7 +9,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 
 @Injectable()
 export class CustomerService {
-  private url="api/customers";
+  private url="http://127.0.0.1:5000/api/customers";
 
   constructor(private http: HttpClient) {}
 
@@ -34,7 +34,7 @@ export class CustomerService {
         // if not search term, return empty customer array.
         return of([]);
       }
-      return this.http.get<Customer[]>(`api/customers/?name=${term}`).pipe(
+      return this.http.get<Customer[]>(`${this.url}/?name=${term}`).pipe(
         tap(_ => console.log(`found customers matching "${term}"`)),
         catchError(this.handleError<Customer[]>('searchCustomers', []))
       );
