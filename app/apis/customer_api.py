@@ -1,4 +1,5 @@
-from app import api, db, models
+from app import db, models
+from . import api
 from flask_restplus import Resource, fields
 import json
 
@@ -10,7 +11,7 @@ customer_model = api.model('Customer', {
     'lastName': fields.String(attribute='lastname'),
     'email': fields.String,
     'phone': fields.String,
-    'uri': fields.Url('customer_ep')
+    'uri': fields.Url('api.customer_ep')
 })
 
 class CustomerDAO(object):
@@ -37,15 +38,3 @@ class Customer(Resource):
     def get(self, id):
         '''Get a particular customer'''
         return DAO.get(id), 200, {'Access-Control-Allow-Origin':'*'}
-
-@api.route('/test/<int:id>')
-class MyTest(Resource):
-    @api.marshal_with(customer_model)
-    def get(self, id):
-        return DAO.get(id)
-
-
-@api.route('/hello')
-class HelloWorld(Resource):
-    def get(self):
-        return {'hello': 'world'}

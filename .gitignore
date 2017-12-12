@@ -1,5 +1,7 @@
 *.iml
 *.ipr
 *.pyc
+*.sqlite
 .idea/
 .vscode/
+app/static/dist/
