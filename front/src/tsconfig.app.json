@@ -6,6 +6,10 @@
     "module": "es2015",
     "types": []
   },
+  "includes": [
+    "**/*.ts",
+    "node_modules/angular2-fullcalendar/src/calendar/calendar.ts"
+  ],
   "exclude": [
     "test.ts",
     "**/*.spec.ts"
