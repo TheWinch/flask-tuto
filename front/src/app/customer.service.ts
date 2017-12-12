@@ -1,24 +1,49 @@
 import { Injectable } from '@angular/core';
 import { Customer } from './model/customer';
-import { Headers, Http } from '@angular/http';
+import { HttpHeaders, HttpClient } from '@angular/common/http';
 
-import 'rxjs/add/operator/toPromise';
+import { Observable } from 'rxjs/Observable';
+import { of } from 'rxjs/observable/of';
+import { catchError, map, tap } from 'rxjs/operators';
+
 
 @Injectable()
 export class CustomerService {
-  private url="http://127.0.0.1:5000/api/customers";
+  private url="api/customers";
 
-  constructor(private http: Http) {}
+  constructor(private http: HttpClient) {}
 
-  getCustomers(): Promise<Customer[]> {
-    return this.http.get(this.url)
-              .toPromise()
-              .then(response => response.json() as Customer)
-              .catch(this.handleError);
+  getCustomers(): Observable<Customer[]> {
+    return this.http.get<Customer[]>(this.url).pipe(
+                tap(customers => console.log(`Fetched customers: ${customers}`)),
+                catchError(this.handleError('getCustomers', []))
+            );
+  }
+  
+  getCustomer(id: number): Observable<Customer> {
+    const url = `${this.url}/${id}`;
+    return this.http.get<Customer>(url).pipe(
+      tap(_ => console.log(`fetched customer id=${id}`)),
+      catchError(this.handleError<Customer>(`getCustomer id=${id}`))
+    );
   }
 
-  private handleError(error: any): Promise<any> {
-    console.error('An error occurred', error); // for demo purposes only
-    return Promise.reject(error.message || error);
+    /* GET customers whose name contains search term */
+    searchCustomers(term: string): Observable<Customer[]> {
+      if (!term.trim()) {
+        // if not search term, return empty customer array.
+        return of([]);
+      }
+      return this.http.get<Customer[]>(`api/customers/?name=${term}`).pipe(
+        tap(_ => console.log(`found customers matching "${term}"`)),
+        catchError(this.handleError<Customer[]>('searchCustomers', []))
+      );
+    }  
+  
+  private handleError<T>(operation = 'operation', result ?: T) {
+    return (error: any): Observable<T> => {
+        console.error(`${operation} failed`, error);
+        return of(result as T);
+    }
   }
 }
