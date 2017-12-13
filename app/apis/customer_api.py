@@ -1,7 +1,8 @@
-from app import db, models
-from . import api
 from flask_restplus import Resource, fields, reqparse
-from sqlalchemy import or_
+from flask import request
+
+from app import models
+from . import api
 
 ns = api.namespace('customers', description='Customers operations')
 
@@ -14,32 +15,28 @@ customer_model = api.model('Customer', {
     'uri': fields.Url('api.customer_ep')
 })
 
-class CustomerDAO(object):
-    def get(self, id):
-        return models.Customer.query.get(id)
 
-    def getAll(self):
-        return models.Customer.query.all()
-        
-    def getByNameOrEmail(self, pattern):
-        q = models.Customer.query
-        p=str(pattern[0])
-        print(p)
-        return q.filter(or_(models.Customer.firstname.like('%'+p+'%'), models.Customer.lastname.like('%'+p+'%'), models.Customer.email.like('%'+p+'%'))).all()
-
-DAO = CustomerDAO()
-
-@ns.route('','/')
+@ns.route('', '/')
 class CustomerList(Resource):
     @ns.marshal_list_with(customer_model)
     def get(self):
-        '''Get the list of all customers, possibly filtered by name'''
+        """Get the list of all customers, possibly filtered by name"""
         parser = reqparse.RequestParser()
         parser.add_argument('name', action='append')
         args = parser.parse_args()
         if args['name'] is not None:
-            return DAO.getByNameOrEmail(args['name']), 200, {'Access-Control-Allow-Origin':'*'}
-        return DAO.getAll(), 200, {'Access-Control-Allow-Origin':'*'}
+            return models.Customer.load_by_name(args['name'][0]), 200, {'Access-Control-Allow-Origin': '*'}
+        return models.Customer.load_all(), 200, {'Access-Control-Allow-Origin': '*'}
+
+    @ns.marshal_with(customer_model, code=201)
+    def post(self):
+        """Create a new customer"""
+        data = request.form
+        c = models.Customer(firstname=data['firstName'], lastname=data['lastName'], email=data['email'],
+                            phone=data['phone'])
+        c.create()
+        return c, 201, {'Access-Control-Allow-Origin': '*'}
+
 
 @ns.route('/<int:id>', endpoint='customer_ep')
 @ns.response(404, 'Customer not found')
@@ -47,5 +44,10 @@ class CustomerList(Resource):
 class Customer(Resource):
     @ns.marshal_with(customer_model)
     def get(self, id):
-        '''Get a particular customer'''
-        return DAO.get(id), 200, {'Access-Control-Allow-Origin':'*'}
+        """Get a particular customer"""
+        return models.Customer.load(id), 200, {'Access-Control-Allow-Origin': '*'}
+
+    def delete(self, id):
+        """Delete a particular customer"""
+        models.Customer.load(id).delete()
+        return '', 204, {'Access-Control-Allow-Origin': '*'}
