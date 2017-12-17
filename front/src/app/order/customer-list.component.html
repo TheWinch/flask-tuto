@@ -1,0 +1,10 @@
+<ul class="list-unstyled">
+    <li *ngFor="let customer of orderCustomers"
+        class="btn btn-block"
+        [class.btn-primary]="customer === selectedCustomer"
+        [class.btn-outline-secondary]="customer !== selectedCustomer"
+        (click)="onSelect(customer)">
+      <span class="badge">{{customer.id}}</span>{{customer.firstName}} {{customer.lastName}}
+    </li>
+    <osc-customer-search (selected)="onCustomerAdded($event)"></osc-customer-search>
+</ul>

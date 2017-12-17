@@ -1,10 +1,10 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, Input, EventEmitter, Output } from '@angular/core';
 import { CalendarComponent } from 'ng-fullcalendar';
 import { Options } from 'fullcalendar';
 import { EventService } from './event.service';
 
 @Component({
-  selector: 'app-calendar',
+  selector: 'osc-calendar',
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.css']
 })
@@ -24,33 +24,34 @@ export class MyCalendarComponent implements OnInit {
     console.log(`clicked on button: ${button}`);
     console.log(button);
   }
-  
+
   ngOnInit() {
     this.eventService.getEvents().subscribe(data => {
       this.calendarOptions = {
+        height: 688,
+        defaultView: 'agendaWeek',
+        locale: 'fr',
+        firstDay: 1,
+        defaultDate: '2016-08-01',
+        minTime: '8:00',
+        maxTime: '19:00',
         editable: true,
-        //defaultDate: '2016-09-12',
         eventLimit: false,
         header: {
           left: 'prev,next today',
           center: 'title',
           right: 'month,agendaWeek,agendaDay,listMonth'
         },
-        events: data
+        businessHours: {
+          dow: [ 0, 1, 2, 3, 4, 5, 6 ],
+            start: '8:00',
+            end: '19:00',
+          },
+          events: data
       };
     });
   }
-
-  /*
-  calendarOptions:Object = {
-        height: 'parent',
-        fixedWeekCount : false,
-        defaultDate: '2016-09-12',
-        editable: true,
-        eventLimit: true, // allow "more" link when too many events
-        events: 
-      };
-    let el = {
+/* let el = {
    title: 'New event'
    start: '2017-10-07',
    url: 'www.google.fr'
@@ -58,10 +59,10 @@ export class MyCalendarComponent implements OnInit {
    ...
  }
  this.ucCalendar.fullCalendar('renderEvent', el);
- this.ucCalendar.fullCalendar('rerenderEvents');   
-      */
+ this.ucCalendar.fullCalendar('rerenderEvents');
    // see https://github.com/Jamaks/ng-fullcalendar
-  
+      */
+
   constructor(protected eventService: EventService) { }
 
 }

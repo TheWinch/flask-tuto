@@ -1,0 +1,58 @@
+<ng-template #content let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h5 class="modal-title">Créer un client</h5>
+    <button type="button" class="close" aria-label="Close" (click)="d('abort')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="container">
+      <div class="form-group row">
+        <label for="firstName" class="col-sm-3 col-form-label">Prénom</label>
+        <div class="col-sm-9">
+          <input type="text" class="form-control" name="firstName" [(ngModel)]="newCustomer.firstName" placeholder="Prénom">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="lastName" class="col-sm-3 col-form-label">Nom de famille</label>
+        <div class="col-sm-9">
+          <input type="text" class="form-control" name="lastName" [(ngModel)]="newCustomer.lastName" placeholder="Nom de famille">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="lastName" class="col-sm-3 col-form-label">Téléphone</label>
+        <div class="col-sm-9">
+          <input type="text" class="form-control" name="phone" [(ngModel)]="newCustomer.phone" placeholder="Téléphone">
+        </div>
+      </div>
+      <br>
+      <div class="form-group row">
+        <label for="email" class="col-sm-3 col-form-label">Email</label>
+        <div class="col-sm-9">
+          <input type="email" class="form-control" name="email" [(ngModel)]="newCustomer.email" placeholder="email">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="c('confirm')">Confirmer</button>
+  </div>
+</ng-template>
+
+<div class="input-group mt-2 align-middle">
+  <input #searchBox type="text" 
+                    class="form-control" 
+                    (keyup)="search(searchBox.value)" 
+                    placeholder="Rechercher..." 
+                    style="width: 100%;"/>
+</div>
+<div class="list-group">
+  <a *ngFor="let customer of searchResults$ | async" class="list-group-item list-group-item-action " (click)="onSelect(customer)">
+    {{customer.firstName}} {{customer.lastName}}
+  </a>
+  <a class="list-group-item list-group-item-action align-middle" role="button" (click)="showCustomerCreationModal(content)">
+    <span class="mr-2 text-success">
+      <i class="fa fa-plus-circle fa-2x"></i>
+    </span>Créer un client...
+  </a>
+</div>
