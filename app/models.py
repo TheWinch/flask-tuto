@@ -32,6 +32,7 @@ class Customer(db.Model):
     def create(self):
         db.session.add(self)
         db.session.commit()
+        db.session.refresh(self, ['id'])
 
     def update(self):
         db.session.commit()
@@ -50,7 +51,7 @@ class Order(db.Model):
     appointments = db.relationship('Appointment', backref='order', lazy=False)
 
     def __repr__(self):
-        return '<Order p=%d>' % self.payer_id
+        return '<Order %d p=%d>' % (self.id, self.payer_id)
 
     @staticmethod
     def load_all():
@@ -63,6 +64,7 @@ class Order(db.Model):
     def create(self):
         db.session.add(self)
         db.session.commit()
+        db.session.refresh(self, ['id'])
 
     def update(self):
         db.session.commit()
@@ -94,6 +96,7 @@ class Appointment(db.Model):
     def create(self):
         db.session.add(self)
         db.session.commit()
+        db.session.refresh(self, ['id'])
 
     def update(self):
         db.session.commit()
@@ -128,6 +131,7 @@ class TimeSlot(db.Model):
     def create(self):
         db.session.add(self)
         db.session.commit()
+        db.session.refresh(self, ['id'])
 
     def update(self):
         db.session.commit()

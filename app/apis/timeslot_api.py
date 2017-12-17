@@ -23,19 +23,19 @@ class TimeslotList(Resource):
     @ns.marshal_list_with(timeslot_model)
     def get(self):
         """Get the list of all timeslots"""
-        return models.TimeSlot.load_all(), 200, {'Access-Control-Allow-Origin': '*'}
+        return models.TimeSlot.load_all()
 
     @ns.marshal_with(timeslot_model, code=201)
     def post(self):
         """Create a new timeslot"""
-        data = request.form
+        data = request.json
 
         start = parse(data['start'])
         capacity = int(data['capacity'])
         t = models.TimeSlot(start=start, duration=int(data['duration']), trainers=data['trainers'],
                             capacity=capacity, free_capacity=capacity)
         t.create()
-        return t, 201, {'Access-Control-Allow-Origin': '*'}
+        return t, 201
 
 
 @ns.route('/<int:id>', endpoint='timeslot_ep')
@@ -45,9 +45,9 @@ class Timeslot(Resource):
     @ns.marshal_with(timeslot_model)
     def get(self, id):
         """Get a particular timeslot"""
-        return models.TimeSlot.load(id), 200, {'Access-Control-Allow-Origin': '*'}
+        return models.TimeSlot.load(id)
 
     def delete(self, id):
         """Delete a particular timeslot"""
         models.TimeSlot.load(id).delete()
-        return '', 204, {'Access-Control-Allow-Origin': '*'}
+        return '', 204

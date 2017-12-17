@@ -1,5 +1,6 @@
-from flask_restplus import Resource, fields, reqparse
-from flask import request
+from flask_restplus import Resource, fields, reqparse, cors
+from flask import request, make_response
+from functools import wraps
 
 from app import models
 from . import api
@@ -25,17 +26,17 @@ class CustomerList(Resource):
         parser.add_argument('name', action='append')
         args = parser.parse_args()
         if args['name'] is not None:
-            return models.Customer.load_by_name(args['name'][0]), 200, {'Access-Control-Allow-Origin': '*'}
-        return models.Customer.load_all(), 200, {'Access-Control-Allow-Origin': '*'}
+            return models.Customer.load_by_name(args['name'][0]), 200
+        return models.Customer.load_all()
 
     @ns.marshal_with(customer_model, code=201)
     def post(self):
         """Create a new customer"""
-        data = request.form
+        data = request.json
         c = models.Customer(firstname=data['firstName'], lastname=data['lastName'], email=data['email'],
                             phone=data['phone'])
         c.create()
-        return c, 201, {'Access-Control-Allow-Origin': '*'}
+        return c, 201
 
 
 @ns.route('/<int:id>', endpoint='customer_ep')
@@ -45,9 +46,9 @@ class Customer(Resource):
     @ns.marshal_with(customer_model)
     def get(self, id):
         """Get a particular customer"""
-        return models.Customer.load(id), 200, {'Access-Control-Allow-Origin': '*'}
+        return models.Customer.load(id)
 
     def delete(self, id):
         """Delete a particular customer"""
         models.Customer.load(id).delete()
-        return '', 204, {'Access-Control-Allow-Origin': '*'}
+        return '', 204
