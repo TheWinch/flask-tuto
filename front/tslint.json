@@ -117,13 +117,13 @@
     "directive-selector": [
       true,
       "attribute",
-      "osc-front",
+      "osc",
       "camelCase"
     ],
     "component-selector": [
       true,
       "element",
-      "osc-front",
+      "osc",
       "kebab-case"
     ],
     "use-input-property-decorator": true,
