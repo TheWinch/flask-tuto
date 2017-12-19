@@ -2,7 +2,6 @@ import { Component, OnInit, Output, EventEmitter, ElementRef, ViewChild } from '
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { Observable } from 'rxjs/Observable';
-import { of } from 'rxjs/observable/of';
 import { Subject } from 'rxjs/Subject';
 
 import {
@@ -11,7 +10,6 @@ import {
 
 import { CustomerService } from '../customer.service';
 import { ProtoCustomer, Customer } from '../model/customer';
-import { initNgModule } from '@angular/core/src/view/ng_module';
 
 @Component({
   selector: 'osc-customer-search',

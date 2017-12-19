@@ -1,18 +1,20 @@
-import { Component, OnInit, EventEmitter, Output  } from '@angular/core';
+import {Component, Input, EventEmitter, Output, ChangeDetectionStrategy} from '@angular/core';
 
 import { Customer } from '../model/customer';
-import { CustomerService } from '../customer.service';
+import {CustomerAppointments} from "./order.component";
 
 @Component({
   selector: 'osc-customer-list',
   templateUrl: './customer-list.component.html',
-  styleUrls: ['./customer-list.component.css']
+  styleUrls: ['./customer-list.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class OrderCustomerListComponent {
-  selectedCustomer: Customer;
-  orderCustomers: Customer[] = [];
+  @Input()
+  currentSelection: Customer;
+  @Input()
+  customerAppointments: CustomerAppointments[] = [];
   @Output() selected: EventEmitter<Customer> = new EventEmitter<Customer>();
-  @Output() customerAdded: EventEmitter<Customer> = new EventEmitter<Customer>();
 
   constructor() { }
 
@@ -21,17 +23,7 @@ export class OrderCustomerListComponent {
    * @param customer selected customer
    */
   onSelect(customer: Customer): void {
-    this.selectedCustomer = customer;
+    this.currentSelection = customer;
     this.selected.emit(customer);
-  }
-
-  /**
-   * A customer has been added to the list
-   * @param customer added customer
-   */
-  onCustomerAdded(customer: Customer): void {
-    console.log('New customer pushed into order: ' + JSON.stringify(customer));
-    this.orderCustomers.push(customer);
-    this.customerAdded.emit(customer);
   }
 }

@@ -1,10 +1,55 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CalendarComponent } from 'ng-fullcalendar';
 import { Options } from 'fullcalendar';
 
 import { Customer } from '../model/customer';
 import { EventService } from '../calendar/event.service';
+import {Arrays} from "../model/arrays";
+
+export class Appointment {
+  start: Date;
+  eventId: string;
+}
+
+export class CustomerAppointments {
+  customer: Customer;
+  private _appointments: Appointment[];
+
+  get sorted_appointments() {
+    return this._appointments.sort((a, b) => a.start < b.start ? -1 : 1);
+  }
+
+  get appointments() {
+    return this._appointments;
+  }
+
+  hasAppointment(event: any): boolean {
+    return this._appointments.reduce((contains, a) => contains || a.eventId === event._id, false);
+  }
+
+  addAppointment(event: any): CustomerAppointments {
+    if (this.hasAppointment(event)) {
+      return this;
+    }
+    let newAppointments = Arrays.append(this._appointments, {start: event.start, eventId: event._id});
+    return new CustomerAppointments(
+      this.customer,
+      newAppointments);
+  }
+
+  removeAppointment(event: any): CustomerAppointments {
+    return new CustomerAppointments(
+      this.customer,
+      Arrays.removeMatching(this._appointments, a => a.eventId === event._id)
+    );
+  }
+
+  constructor(customer: Customer, appointments: Appointment[]) {
+    this.customer = customer;
+    this._appointments = appointments;
+  }
+}
+
 
 @Component({
   selector: 'osc-front-order',
@@ -13,65 +58,72 @@ import { EventService } from '../calendar/event.service';
 })
 export class OrderComponent implements OnInit {
   title: string;
-  closeResult: string;
   calendarOptions: Options;
   @ViewChild(CalendarComponent) ucCalendar: CalendarComponent;
 
-  private calendarData: any = [];
   private currentCustomer: Customer;
-  private appointments: any = {};
+  private appointments: CustomerAppointments[] = [];
 
-  constructor(private modalService: NgbModal, private eventService: EventService) { }
+  constructor(private eventService: EventService) {}
 
-  openSaveModal(content) {
-    this.modalService.open(content).result.then((result) => {
-      this.closeResult = `Closed with: ${result}`;
-    }, (reason) => {
-      this.closeResult = `Dismissed with: ${reason}`;
-    });
+  passOrder() {
+    console.log('I want to complete my order!');
   }
 
   onCustomerSelected(customer: Customer): void {
-    console.log('Customer selected: ' + JSON.stringify(customer));
-    this.currentCustomer = customer;
-    for (const a of this.appointments[customer.id]) {
-        this.ucCalendar.fullCalendar('removeEvents', a.id);
-        a.backgroundColor = 'red';
-        this.ucCalendar.fullCalendar('renderEvent', a);
+    this.switchCustomer(customer);
+  }
+
+  private switchCustomer(next: Customer) {
+    // un-highlight all events of current user
+    if (this.currentCustomer != null) {
+      this.appointments
+        .filter(ca => ca.customer.id === this.currentCustomer.id)
+        .reduce((reduced, ca) => [...reduced, ...ca.appointments], []) // flatten the appointments
+        .forEach(a => {
+          let event = this.ucCalendar.fullCalendar('clientEvents', a.eventId)[0];
+          event.borderColor = '';
+          this.ucCalendar.fullCalendar('updateEvent', event);
+        });
     }
+    // highlight events of next user
+    this.appointments
+      .filter(ca => ca.customer.id === next.id)
+      .reduce((reduced, ca) => [...reduced, ...ca.appointments], []) // flatten the appointments
+      .forEach(a => {
+        let event = this.ucCalendar.fullCalendar('clientEvents', a.eventId)[0];
+        event.borderColor = 'red';
+        this.ucCalendar.fullCalendar('updateEvent', event);
+      });
+    // switch state
+    this.currentCustomer = next;
   }
 
   onCustomerAdded(customer: Customer): void {
-    this.appointments[customer.id] = [];
-    console.log('Adding appointments => ' + JSON.stringify(this.appointments));
+    // if it isn't in the list already
+    if (this.appointments.reduce((contains, ca) => contains && ca.customer.id !== customer.id, true)) {
+      this.appointments = Arrays.append(this.appointments, new CustomerAppointments(customer, []));
+    }
+    this.switchCustomer(customer);
   }
 
-  eventClick(model: any): void {
-    model = {
-      event: {
-        id: model.event.id,
-        start: model.event.start,
-        end: model.event.end,
-        title: model.event.title,
-        allDay: model.event.allDay,
-        backgroundColor: 'red'
-      },
-      duration: {}
-    };
-    console.log('clicked on event: ' + JSON.stringify(model));
+  addOrRemoveEvent(model: any): void {
     if (this.currentCustomer == null) {
       return;
     }
-    this.appointments[this.currentCustomer.id].push(model.event);
-    console.log('New appointments: ' + JSON.stringify(this.appointments));
-    // For some reason, updateEvent seems not working
-    // this.ucCalendar.fullCalendar('removeEvents', model.event.id);
-    // this.ucCalendar.fullCalendar('renderEvent', model.event);
+
+    const oldCa: CustomerAppointments = this.appointments.filter(ca => ca.customer.id === this.currentCustomer.id)[0];
+    let hadAppointment = oldCa.hasAppointment(model.event);
+    let newCa = hadAppointment ? oldCa.removeAppointment(model.event) : oldCa.addAppointment(model.event);
+    this.appointments = Arrays.updateElement(this.appointments, oldCa, newCa);
+
+    // and update the calendar rendering
+    model.event.borderColor = hadAppointment ? '' : 'red';
+    this.ucCalendar.fullCalendar('updateEvent', model.event);
   }
 
   ngOnInit() {
     this.eventService.getEvents().subscribe(data => {
-        this.calendarData = data;
         this.calendarOptions = {
           height: 688,
           defaultView: 'agendaWeek',
@@ -91,7 +143,7 @@ export class OrderComponent implements OnInit {
               start: '8:00',
               end: '19:00',
           },
-          events: this.calendarData
+          events: data
         };
       });
   }

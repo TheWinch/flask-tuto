@@ -1,53 +1,20 @@
-<div class="row bg-light">
-    <div class="col-md">
-        <h4 class="text-center">{{ title }} - {{ closeResult }}</h4>
-    </div>
-    <a class="col-md-2 btn btn-success" role="button" (click)="openSaveModal(saveModalContent)">
-        Finaliser la commande
-        <span class="badge badge-light">3</span>
-    </a>
-</div>
-<div class="row">
-    <div class="col-md-3 panel panel-default">
-        <div class="panel-heading text-center">
-            <strong>Clients dans la commande</strong>
-        </div>
-        <div class="panel-body">
-            <osc-customer-list (selected)="onCustomerSelected($event)" (customerAdded)="onCustomerAdded($event)"></osc-customer-list>                
-        </div>
-    </div>
-    <div class="col-md">
-        <ng-fullcalendar #ucCalendar [options]="calendarOptions" (eventClick)="eventClick($event.detail)"></ng-fullcalendar>
-    </div>
-</div>
-<ng-template #saveModalContent let-c="close" let-d="dismiss">
-    <div class="modal-header">
-        <h5 class="modal-title">{{ title }}</h5>
-        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
-            <span aria-hidden="true">&times;</span>
+
+<div class="row mt-3">
+  <div class="col-md">
+    <ng-fullcalendar #ucCalendar [options]="calendarOptions" (eventClick)="addOrRemoveEvent($event.detail)"></ng-fullcalendar>
+  </div>
+  <div class="col-md-3 panel panel-default">
+      <div class="panel-heading text-center mb-3">
+          <strong>Clients dans la commande</strong>
+      </div>
+      <div class="panel-body">
+        <osc-customer-list [currentSelection]="currentCustomer" [customerAppointments]="appointments" (selected)="onCustomerSelected($event)"></osc-customer-list>
+        <osc-customer-search (selected)="onCustomerAdded($event)"></osc-customer-search>
+        <button class="btn btn-block btn-success mt-3" type="button"
+             [disabled]="appointments.length == 0 || appointments[0].appointments.length == 0"
+             (click)="passOrder()">
+          Finaliser la commande
         </button>
-    </div>
-    <div class="modal-body text-center">
-        <table class="border-0 w-75">
-            <!-- TODO - should be generated from the order content -->
-            <tbody>
-                <tr>
-                    <td>Client 1</td>
-                    <td class="text-right">6 cours</td>
-                </tr>
-                <tr>
-                    <td>Client 2</td>
-                    <td class="text-right">7 cours</td>
-                </tr>
-                <tr>
-                    <td>Client 3</td>
-                    <td class="text-right">6 cours</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" click="d('Dismiss click')">Fermer</button>
-        <button type="button" class="btn btn-primary" (click)="c('Confirm click')">Confirmer</button>
-    </div>
-</ng-template>
+      </div>
+  </div>
+</div>
