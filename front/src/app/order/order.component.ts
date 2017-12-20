@@ -1,70 +1,27 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { CalendarComponent } from 'ng-fullcalendar';
+import { FullCalendarComponent } from '../calendar/fullcalendar.component';
 import { Options } from 'fullcalendar';
 
 import { Customer } from '../model/customer';
 import { EventService } from '../calendar/event.service';
-import {Arrays} from "../model/arrays";
-
-export class Appointment {
-  start: Date;
-  eventId: string;
-}
-
-export class CustomerAppointments {
-  customer: Customer;
-  private _appointments: Appointment[];
-
-  get sorted_appointments() {
-    return this._appointments.sort((a, b) => a.start < b.start ? -1 : 1);
-  }
-
-  get appointments() {
-    return this._appointments;
-  }
-
-  hasAppointment(event: any): boolean {
-    return this._appointments.reduce((contains, a) => contains || a.eventId === event._id, false);
-  }
-
-  addAppointment(event: any): CustomerAppointments {
-    if (this.hasAppointment(event)) {
-      return this;
-    }
-    let newAppointments = Arrays.append(this._appointments, {start: event.start, eventId: event._id});
-    return new CustomerAppointments(
-      this.customer,
-      newAppointments);
-  }
-
-  removeAppointment(event: any): CustomerAppointments {
-    return new CustomerAppointments(
-      this.customer,
-      Arrays.removeMatching(this._appointments, a => a.eventId === event._id)
-    );
-  }
-
-  constructor(customer: Customer, appointments: Appointment[]) {
-    this.customer = customer;
-    this._appointments = appointments;
-  }
-}
+import { Arrays } from "../model/arrays";
+import { CustomerAppointments } from "../model/order";
+import {AppointmentService} from "../calendar/appointment.service";
 
 
 @Component({
   selector: 'osc-front-order',
-  templateUrl: './order.component.html',
-  styleUrls: ['../calendar/calendar.component.css']
+  templateUrl: './order.component.html'
 })
 export class OrderComponent implements OnInit {
   title: string;
   calendarOptions: Options;
-  @ViewChild(CalendarComponent) ucCalendar: CalendarComponent;
+  @ViewChild(FullCalendarComponent) ucCalendar: FullCalendarComponent;
 
-  private currentCustomer: Customer;
-  private appointments: CustomerAppointments[] = [];
+  currentCustomer: Customer;
+  appointments: CustomerAppointments[] = [];
 
-  constructor(private eventService: EventService) {}
+  constructor(private eventService: EventService, private appointmentsService: AppointmentService) {}
 
   passOrder() {
     console.log('I want to complete my order!');
@@ -83,7 +40,7 @@ export class OrderComponent implements OnInit {
         .forEach(a => {
           let event = this.ucCalendar.fullCalendar('clientEvents', a.eventId)[0];
           event.borderColor = '';
-          this.ucCalendar.fullCalendar('updateEvent', event);
+          this.ucCalendar.updateEvent(event);
         });
     }
     // highlight events of next user
@@ -91,9 +48,9 @@ export class OrderComponent implements OnInit {
       .filter(ca => ca.customer.id === next.id)
       .reduce((reduced, ca) => [...reduced, ...ca.appointments], []) // flatten the appointments
       .forEach(a => {
-        let event = this.ucCalendar.fullCalendar('clientEvents', a.eventId)[0];
+        let event = this.ucCalendar.clientEvents(a.eventId)[0];
         event.borderColor = 'red';
-        this.ucCalendar.fullCalendar('updateEvent', event);
+        this.ucCalendar.updateEvent(event);
       });
     // switch state
     this.currentCustomer = next;
@@ -119,7 +76,7 @@ export class OrderComponent implements OnInit {
 
     // and update the calendar rendering
     model.event.borderColor = hadAppointment ? '' : 'red';
-    this.ucCalendar.fullCalendar('updateEvent', model.event);
+    this.ucCalendar.updateEvent(model.event);
   }
 
   ngOnInit() {

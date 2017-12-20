@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 
 import { Observable } from 'rxjs/Observable';
 import { of } from 'rxjs/observable/of';
@@ -7,80 +7,120 @@ import { EventService, Event } from './event.service';
 
 @Injectable()
 export class EventServiceMock implements EventService {
-    private repo: Event[] = this.createRepo();
+  private repo: Event[] = this.createRepo();
+  private counter: number = 13;
 
-    public getEvents(): Observable<Event[]> {
-        return of(this.repo);
+  constructor() {
+    console.log('Creating the Event Service mock');
+  }
+
+  public getEvents(): Observable<Event[]> {
+      return of(this.repo);
+  }
+
+  public getEventsByDate(start: Date, end: Date): Observable<Event[]> {
+    return of(this.repo.filter(event => {
+        let d = event.start instanceof Date ? event.start: new Date(event.start);
+        return d >= start && d < end;
+      }));
+  }
+
+  public createEvents(model: Event[]): Observable<Event[]> {
+      const generated: Event[] = [];
+      for (let e of model) {
+        let item = {
+          id: this.counter++,
+          start: e.start,
+          end: e.end,
+          title: e.title
+        };
+        generated.push(item);
+        this.repo.push(item);
+      }
+      return of(generated);
     }
 
     private createRepo(): Event[] {
         const dateObj = new Date();
-        const yearMonth = dateObj.getUTCFullYear() + '-' + (dateObj.getUTCMonth() + 1);
-        const data: any = [{
+        let yearMonth = dateObj.getUTCFullYear() + '-' + (dateObj.getUTCMonth() + 1) + '-';
+        const day = dateObj.getUTCDate();
+        const dayStr = '' + day;
+        if(dayStr.length === 1) {
+          yearMonth = yearMonth + '0';
+        }
+        return [
+          {
             id: 1,
-            title: 'All Day Event',
-            start: yearMonth + '-01'
-        },
-        {
+            start: yearMonth + (day-2) + 'T08:00:00',
+            end: yearMonth + (day-2) + 'T10:00:00',
+            capacity: 6
+          },
+          {
             id: 2,
-            title: 'Long Event',
-            start: yearMonth + '-07',
-            end: yearMonth + '-10'
-        },
-        {
-            id: 999,
-            title: 'Repeating Event',
-            start: yearMonth + '-09T16:00:00'
-        },
-        {
-            id: 999,
-            title: 'Repeating Event',
-            start: yearMonth + '-16T16:00:00'
-        },
-        {
+            start: yearMonth + (day-2) + 'T10:30:00',
+            end: yearMonth + (day-2) + 'T12:30:00',
+            capacity: 8
+          },
+          {
             id: 3,
-            title: 'Conference',
-            start: yearMonth + '-11',
-            end: yearMonth + '-13'
-        },
-        {
+            start: yearMonth + (day-2) + 'T14:00:00',
+            end: yearMonth + (day-2) + 'T16:00:00',
+            capacity: 8
+          },
+          {
             id: 4,
-            title: 'Meeting',
-            start: yearMonth + '-12T10:30:00',
-            end: yearMonth + '-12T12:30:00',
-            customerId: 1
-        },
-        {
+            start: yearMonth + (day-2) + 'T16:30:00',
+            end: yearMonth + (day-2) + 'T18:30:00',
+            capacity: 8
+          },
+          {
             id: 5,
-            title: 'Lunch',
-            start: yearMonth + '-12T12:00:00'
-        },
-        {
+            start: yearMonth + (day-1) + 'T08:00:00',
+            end: yearMonth + (day-1) + 'T10:00:00',
+            capacity: 6
+          },
+          {
             id: 6,
-            title: 'Meeting',
-            start: yearMonth + '-12T14:30:00'
-        },
-        {
+            start: yearMonth + (day-1) + 'T10:30:00',
+            end: yearMonth + (day-1) + 'T12:30:00',
+            capacity: 8
+          },
+          {
             id: 7,
-            title: 'Happy Hour',
-            start: yearMonth + '-12T17:30:00'
-        },
-        {
+            start: yearMonth + (day-1) + 'T14:00:00',
+            end: yearMonth + (day-1) + 'T16:00:00',
+            capacity: 8
+          },
+          {
             id: 8,
-            title: 'Dinner',
-            start: yearMonth + '-12T20:00:00'
-        },
-        {
+            start: yearMonth + (day-1) + 'T16:30:00',
+            end: yearMonth + (day-1) + 'T18:30:00',
+            capacity: 8
+          },
+          {
             id: 9,
-            title: 'Birthday Party',
-            start: yearMonth + '-13T07:00:00'
-        },
-        {
+            start: yearMonth + (day) + 'T08:00:00',
+            end: yearMonth + (day) + 'T10:00:00',
+            capacity: 2
+          },
+          {
             id: 10,
-            title: 'Click for Google',
-            url: 'http://google.com/',
-            start: yearMonth + '-28'
-        }];
-        return data;
+            start: yearMonth + (day) + 'T10:30:00',
+            end: yearMonth + (day) + 'T12:30:00',
+            capacity: 0
+          },
+          {
+            id: 11,
+            start: yearMonth + (day) + 'T14:00:00',
+            end: yearMonth + (day) + 'T16:00:00',
+            capacity: 2
+          },
+          {
+            id: 12,
+            start: yearMonth + (day) + 'T16:30:00',
+            end: yearMonth + (day) + 'T18:30:00',
+            capacity: 2
+          },
+          ];
     }
-};
+}

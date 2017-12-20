@@ -4,9 +4,9 @@ import { RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { FullCalendarModule } from "ng-fullcalendar";
 
 import { AppComponent } from './app.component';
+import { FullCalendarComponent } from './calendar/fullcalendar.component';
 import { CustomersComponent } from './customer/customers.component';
 import { OrderComponent } from './order/order.component';
 import { OrderCustomerListComponent } from './order/customer-list.component';
@@ -15,13 +15,14 @@ import { CustomerService } from './customer.service';
 import { CustomerServiceMock } from './customer.service.mock';
 import { EventService } from './calendar/event.service';
 import { EventServiceMock } from './calendar/event.service.mock';
-import { MyCalendarComponent } from './calendar/calendar.component';
+import { TimeSlotViewComponent } from './calendar/timeslotview.component';
 import { CustomerSearchComponent } from './customer/customer-search.component';
+import { AppointmentService } from "./calendar/appointment.service";
+import { AppointmentServiceMock } from "./calendar/appointment.service.mock";
 
 @NgModule({
   imports: [
     BrowserModule,
-    FullCalendarModule,
     HttpClientModule,
     FormsModule,
     RouterModule.forRoot([
@@ -35,7 +36,7 @@ import { CustomerSearchComponent } from './customer/customer-search.component';
       },
       {
         path: 'calendar',
-        component: MyCalendarComponent
+        component: TimeSlotViewComponent
       },
       {
         path: '',
@@ -47,16 +48,18 @@ import { CustomerSearchComponent } from './customer/customer-search.component';
     ],
   declarations: [
     AppComponent,
+    FullCalendarComponent,
     CustomersComponent,
     CustomerDetailComponent,
-    MyCalendarComponent,
+    TimeSlotViewComponent,
     OrderComponent,
     OrderCustomerListComponent,
     CustomerSearchComponent
   ],
   providers: [
     { provide: CustomerService, useValue: new CustomerServiceMock() },
-    { provide: EventService, useValue: new EventServiceMock() }
+    { provide: EventService, useValue: new EventServiceMock() },
+    { provide: AppointmentService, useValue: new AppointmentServiceMock() }
   ],
   bootstrap: [AppComponent]
 })
