@@ -2,13 +2,12 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FullCalendarComponent } from './fullcalendar.component';
 import { Options } from 'fullcalendar';
 import { EventService } from './event.service';
+import {MessagesComponent} from "../messages/messages.component";
 
 @Component({
   selector: 'osc-timeslots',
   template: `
-      <p *ngFor="let msg of messages">
-        <ngb-alert [type]="msg.type" (close)="closeAlert(alert)">{{msg.text}}</ngb-alert>
-      </p>
+    <osc-messages></osc-messages>
     <div *ngIf="calendarOptions">
 <osc-fullcalendar #ucCalendar [options]="calendarOptions" 
                  (eventDrop)="onEventDefined($event.detail)"
@@ -20,27 +19,21 @@ import { EventService } from './event.service';
 export class TimeSlotViewComponent implements OnInit {
   calendarOptions: Options;
   @ViewChild(FullCalendarComponent) ucCalendar: FullCalendarComponent;
-  messages: IAlert[] = [];
-  messageIndex: number = 0;
+  @ViewChild(MessagesComponent) messageList: MessagesComponent;
 
   updateEvent(event: any): void {
     console.log(`update event`);
     console.log(event);
   }
 
-  closeAlert(alert: any) {
-    const index: number = this.messages.indexOf(alert);
-    this.messages.splice(index, 1);
-  }
-
   onEventDefined(model: any) {
     const ucCalendar = this.ucCalendar;
     this.eventService.createEvents([model.event]).subscribe(events => {
-      this.info('Event has been created, id: ' + events[0].id);
+      this.messageList.info('Event has been created, id: ' + events[0].id);
       ucCalendar.fullCalendar('unselect');
       ucCalendar.fullCalendar('refetchEvents'); // this is a bit violent, we could just update whatever events have been collected
     }, error => {
-      this.error('Could not create event: ' + error);
+      this.messageList.error('Could not create event: ' + error);
       ucCalendar.fullCalendar('unselect');
     });
   }
@@ -78,25 +71,7 @@ export class TimeSlotViewComponent implements OnInit {
     };
   }
 
-  private info(message: string): void {
-    this.messages.push({id: this.messageIndex++, text: message, type: 'info'});
-    console.log('INFO: ' + message);
-  }
-  private warn(message: string): void {
-    this.messages.push({id: this.messageIndex++, text: message, type: 'warning'});
-    console.log('WARN: ' + message);
-  }
-  private error(message: string): void {
-    this.messages.push({id: this.messageIndex++, text: message, type: 'danger'});
-    console.log('ERROR: ' + message);
-  }
-
   constructor(protected eventService: EventService) { }
 
 }
 
-export interface IAlert {
-  id: number;
-  type: string;
-  text: string;
-}

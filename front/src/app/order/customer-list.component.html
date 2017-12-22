@@ -5,8 +5,9 @@
   <h4 class="d-flex justify-content-between align-items-center">{{ choice.customer.firstName }} {{ choice.customer.lastName }}
     <small>{{ choice.choices.length }} cours</small></h4>
   <ul class="list-unstyled ml-3">
-    <li *ngFor="let c of choice.sorted_choices">
-      {{ c.start.format('DD/MM/YYYY HH:mm') }}
+    <li *ngFor="let c of choice.sorted_choices" class="w-75 d-flex justify-content-between align-items-center">
+      {{c.start | date:'EEEE dd/MM/yyyy':'':'fr'}}
+      <span>{{c.start | date:'à HH:mm':'':'fr'}}</span>
     </li>
   </ul>
 </div>

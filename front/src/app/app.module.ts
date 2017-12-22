@@ -1,27 +1,29 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import {BrowserModule} from "@angular/platform-browser";
+import {NgModule} from "@angular/core";
+import {RouterModule} from "@angular/router";
+import {HttpClientModule} from "@angular/common/http";
+import {FormsModule} from "@angular/forms";
+import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 
-import { AppComponent } from './app.component';
-import { FullCalendarComponent } from './calendar/fullcalendar.component';
-import { CustomersComponent } from './customer/customers.component';
-import { OrderComponent } from './order/order.component';
-import { OrderCustomerListComponent } from './order/customer-list.component';
-import { CustomerDetailComponent } from './customer/customer-detail.component';
-import { CustomerService } from './customer.service';
-import { CustomerServiceMock } from './customer.service.mock';
-import { EventService } from './calendar/event.service';
-import { EventServiceMock } from './calendar/event.service.mock';
-import { TimeSlotViewComponent } from './calendar/timeslotview.component';
-import { CustomerSearchComponent } from './customer/customer-search.component';
-import { AppointmentService } from "./calendar/appointment.service";
-import { AppointmentServiceMock } from "./calendar/appointment.service.mock";
+import {AppComponent} from "./app.component";
+import {FullCalendarComponent} from "./calendar/fullcalendar.component";
+import {CustomersComponent} from "./customer/customers.component";
+import {OrderComponent} from "./order/order.component";
+import {OrderCustomerListComponent} from "./order/customer-list.component";
+import {CustomerDetailComponent} from "./customer/customer-detail.component";
+import {CustomerService} from "./customer.service";
+import {CustomerServiceMock} from "./customer.service.mock";
+import {EventService} from "./calendar/event.service";
+import {EventServiceMock} from "./calendar/event.service.mock";
+import {TimeSlotViewComponent} from "./calendar/timeslotview.component";
+import {CustomerSearchComponent} from "./customer/customer-search.component";
+import {AppointmentService} from "./calendar/appointment.service";
+import {AppointmentServiceMock} from "./calendar/appointment.service.mock";
+import {OrderListComponent} from "./order/order-list.component";
+import {MessagesComponent} from "./messages/messages.component";
 
-import { registerLocaleData } from '@angular/common';
-import localeFr from '@angular/common/locales/fr';
+import {registerLocaleData} from "@angular/common";
+import localeFr from "@angular/common/locales/fr";
 
 registerLocaleData(localeFr, 'fr');
 
@@ -33,7 +35,7 @@ registerLocaleData(localeFr, 'fr');
     RouterModule.forRoot([
       {
         path: 'orders',
-        component: OrderComponent
+        component: OrderListComponent
       },
       {
         path: 'customers',
@@ -59,7 +61,9 @@ registerLocaleData(localeFr, 'fr');
     TimeSlotViewComponent,
     OrderComponent,
     OrderCustomerListComponent,
-    CustomerSearchComponent
+    CustomerSearchComponent,
+    OrderListComponent,
+    MessagesComponent
   ],
   providers: [
     { provide: CustomerService, useValue: new CustomerServiceMock() },

@@ -12,6 +12,7 @@ export class Appointment {
 export class Order {
   id?: number;
   title: string;
+  contact?: string;
   appointments?: Appointment[];
 }
 
@@ -20,5 +21,7 @@ export abstract class AppointmentService {
     abstract getAppointmentsByCustomer(start: Date, end: Date, customerId: number): Observable<Appointment[]>;
     abstract createAppointments(model: Appointment[]): Observable<Appointment[]>;
     abstract getOrder(customerId: number): Observable<Order>;
+    abstract getOrders(): Observable<Order[]>;
+    abstract searchOrders(customerId: number): Observable<Order[]>;
     abstract createOrder(order: Order): Observable<Order>;
 }

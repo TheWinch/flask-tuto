@@ -57,6 +57,14 @@ export class AppointmentServiceMock implements AppointmentService {
     }
   }
 
+  public getOrders(): Observable<Order[]> {
+    return Observable.of(this.orders);
+  }
+
+  public searchOrders(customerId: number): Observable<Order[]> {
+    return Observable.of(this.orders.filter(o => o.appointments.some(a => a.customerId == customerId)));
+  }
+
   public createOrder(order: Order): Observable<Order> {
     let orderId = order.id == null ? this.orderIdGenerator++ : order.id;
     let savedOrder: Order = {
@@ -69,7 +77,7 @@ export class AppointmentServiceMock implements AppointmentService {
 
   private static createAppointmentsRepo(): Appointment[] {
       const dateObj = new Date();
-      let yearMonth = dateObj.getUTCFullYear() + '-' + (dateObj.getUTCMonth() + 1);
+      let yearMonth = dateObj.getUTCFullYear() + '-' + (dateObj.getUTCMonth() + 1) + '-';
       const day = dateObj.getUTCDate();
       const dayStr = '' + day;
       if(dayStr.length === 1) {
@@ -118,6 +126,27 @@ export class AppointmentServiceMock implements AppointmentService {
             slotId: 10,
             start: yearMonth + (day) + 'T10:30:00',
           },
+          {
+            id: 7,
+            customerId: 3,
+            orderId: 2,
+            slotId: 5,
+            start: yearMonth + (day) + 'T10:30:00',
+          },
+          {
+            id: 8,
+            customerId: 3,
+            orderId: 2,
+            slotId: 10,
+            start: yearMonth + (day) + 'T10:30:00',
+          },
+          {
+            id: 8,
+            customerId: 3,
+            orderId: 2,
+            slotId: 14,
+            start: yearMonth + (day+1) + 'T10:30:00',
+          },
         ];
     }
 
@@ -125,9 +154,14 @@ export class AppointmentServiceMock implements AppointmentService {
     return [
       {
         id: 1,
-        title: 'mercredi 20 décembre 2017 à 09:56:34 GMT+01:00',
+        title: 'lundi 18 décembre 2017 à 09:56:34 GMT+01:00',
         appointments: appointments.filter(a => a.orderId == 1)
-      }
+      },
+      {
+        id: 2,
+        title: 'mercredi 20 décembre 2017 à 13:56:34 GMT+01:00',
+        appointments: appointments.filter(a => a.orderId == 2)
+      },
     ]
   }
 

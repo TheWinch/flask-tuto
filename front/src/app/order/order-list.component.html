@@ -1,0 +1,44 @@
+<osc-messages></osc-messages>
+<div *ngIf="selectedOrder == null" class="row justify-content-center">
+  <div class="col-6">
+    <div class="input-group mt-2 align-middle">
+      <input #searchBox type="text"
+             class="form-control"
+             (keyup)="search(searchBox.value)"
+             placeholder="Filtrer par client..."
+             style="width: 100%;"/>
+      <span class="input-group-btn">
+        <button class="btn btn-success" type="button" (click)="createOrder()">
+          <i class="fa fa-plus-circle"></i>
+          Nouvelle commande
+        </button>
+      </span>
+    </div>
+  </div>
+  <div class="col-9">
+    <table class="table table-hover mt-3">
+      <thead>
+      <tr>
+        <th scope="col"></th>
+        <th scope="col">Commande</th>
+        <th scope="col">Nombre de cours</th>
+        <th scope="col">Contact</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let order of orders$ | async">
+        <td><a (click)="editOrder(order)" href="#">Modifier</a></td>
+        <td>{{ order.title }}</td>
+        <td>{{ order.appointments.length}}</td>
+        <td>{{ order.contact }}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div><div class="w-100" ></div>
+  <ngb-pagination [directionLinks]="false" [collectionSize]="orders$.length | async" [pageSize]="10" [(page)]="page"></ngb-pagination>
+</div>
+<osc-order-details *ngIf="selectedOrder != null"
+                   [order]="selectedOrder"
+                   (created)="onOrderCreated($event)"
+                   (aborted)="onOrderAborted()">
+</osc-order-details>

@@ -16,7 +16,7 @@ import {DatePipe} from "@angular/common";
 
 
 @Component({
-  selector: 'osc-front-order',
+  selector: 'osc-order-details',
   templateUrl: './order.component.html'
 })
 export class OrderComponent implements OnInit {
@@ -25,7 +25,8 @@ export class OrderComponent implements OnInit {
   @ViewChild(FullCalendarComponent) ucCalendar: FullCalendarComponent;
 
   @Input() order: Order = null;
-  @Output() orderCreated = new EventEmitter();
+  @Output() created = new EventEmitter();
+  @Output() aborted = new EventEmitter();
   currentCustomer: Customer;
   choices: CustomerChoices[] = [];
 
@@ -36,10 +37,14 @@ export class OrderComponent implements OnInit {
   passOrder() {
     let order = this.toOrder(this.choices);
     this.appointmentService.createOrder(order).subscribe(data => {
-      this.orderCreated.emit(data);
+      this.created.emit(data);
       console.log(data);
     }, failure => {
     })
+  }
+
+  abortOrder() {
+    this.aborted.emit('');
   }
 
   onCustomerSelected(customer: Customer): void {
@@ -88,6 +93,8 @@ export class OrderComponent implements OnInit {
   }
 
   ngOnInit() {
+    console.log('Order detail initializing');
+    console.log(this.order);
     let appointments = this.order != null ? this.order.appointments : [];
     let distinctSlots = new Set<number>(appointments.map(a => a.slotId));
     let orderObservable: Observable<Customer[]> = this.getCustomersForAppointments(appointments);
@@ -106,7 +113,11 @@ export class OrderComponent implements OnInit {
               }
             })
         ));
+        console.log('Choices');
+        console.log(this.choices);
         let coloredEvents = OrderComponent.buildEvents(distinctSlots, data[1]);
+        console.log('Events');
+        console.log(coloredEvents);
         this.calendarOptions = OrderComponent.makeCalendarOptions(coloredEvents);
       });
   }

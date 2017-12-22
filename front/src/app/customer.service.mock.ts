@@ -17,7 +17,7 @@ export class CustomerServiceMock implements CustomerService {
     },
     {
         id: 2,
-        firstName: 'Thibaul',
+        firstName: 'Thibault',
         lastName: 'Girard-Reydet',
         phone: '06.13.283.283',
         email: 'vincent.girardreydet@gmail.com'
