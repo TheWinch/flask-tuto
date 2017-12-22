@@ -121,6 +121,30 @@ export class EventServiceMock implements EventService {
             end: yearMonth + (day) + 'T18:30:00',
             capacity: 2
           },
-          ];
+          {
+            id: 13,
+            start: yearMonth + (day+1) + 'T08:00:00',
+            end: yearMonth + (day+1) + 'T10:00:00',
+            capacity: 4
+          },
+          {
+            id: 14,
+            start: yearMonth + (day+1) + 'T10:30:00',
+            end: yearMonth + (day+1) + 'T12:30:00',
+            capacity: 5
+          },
+          {
+            id: 15,
+            start: yearMonth + (day+1) + 'T14:00:00',
+            end: yearMonth + (day+1) + 'T16:00:00',
+            capacity: 1
+          },
+          {
+            id: 16,
+            start: yearMonth + (day+1) + 'T16:30:00',
+            end: yearMonth + (day+1) + 'T18:30:00',
+            capacity: 7
+          },
+        ];
     }
 }

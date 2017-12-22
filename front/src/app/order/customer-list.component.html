@@ -1,12 +1,12 @@
 <div class="bd-callout mb-3"
-     *ngFor="let appointment of customerAppointments"
-     [class.bd-callout-primary]="appointment.customer === currentSelection"
-     (click)="onSelect(appointment.customer)">
-  <h4 class="d-flex justify-content-between align-items-center">{{ appointment.customer.firstName }} {{ appointment.customer.lastName }}
-    <small>{{ appointment.appointments.length }} cours</small></h4>
+     *ngFor="let choice of customerChoices"
+     [class.bd-callout-primary]="choice.customer === currentSelection"
+     (click)="onSelect(choice.customer)">
+  <h4 class="d-flex justify-content-between align-items-center">{{ choice.customer.firstName }} {{ choice.customer.lastName }}
+    <small>{{ choice.choices.length }} cours</small></h4>
   <ul class="list-unstyled ml-3">
-    <li *ngFor="let a of appointment.sorted_appointments">
-      {{ a.start.format('DD/MM/YYYY HH:mm') }}
+    <li *ngFor="let c of choice.sorted_choices">
+      {{ c.start.format('DD/MM/YYYY HH:mm') }}
     </li>
   </ul>
 </div>

@@ -3,41 +3,71 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { of } from 'rxjs/observable/of';
 
-import { AppointmentService, Appointment } from "./appointment.service";
+import {AppointmentService, Appointment, Order} from "./appointment.service";
 
 @Injectable()
 export class AppointmentServiceMock implements AppointmentService {
-  private repo: Appointment[] = this.createRepo();
-  private counter: number = 11;
+  private appointments: Appointment[];
+  private appointmentIdGenerator: number = 11;
+  private orders: Order[];
+  private orderIdGenerator: number = 2;
+
+  constructor() {
+    this.appointments = AppointmentServiceMock.createAppointmentsRepo();
+    this.orders = AppointmentServiceMock.createOrdersRepo(this.appointments);
+  }
 
   public getAppointments(): Observable<Appointment[]> {
-      return of(this.repo);
+      return of(this.appointments);
   }
 
   public getAppointmentsByCustomer(start: Date, end: Date, customerId: number): Observable<Appointment[]> {
-    return of(this.repo.filter(event => {
-        let d = event.start instanceof Date ? event.start: new Date(event.start);
+    return of(this.appointments.filter(event => {
+        let d = new Date(event.start);
         return event.customerId === customerId && d >= start && d < end;
       }));
   }
 
   public createAppointments(model: Appointment[]): Observable<Appointment[]> {
-      const generated: Appointment[] = [];
-      for (let e of model) {
-        let item: Appointment = {
-          id: this.counter++,
-          start: e.start,
-          customerId: e.customerId,
-          slotId: e.slotId,
-          orderId: e.orderId
-        };
-        generated.push(item);
-        this.repo.push(item);
-      }
-      return of(generated);
-    }
+    return of(this.saveAppointments(0, model));
+  }
 
-    private createRepo(): Appointment[] {
+  /**
+   * Note that an appointment cannot be modified, it can only be created or deleted.
+   */
+  private saveAppointments(orderId: number, model: Appointment[]): Appointment[] {
+    const generated: Appointment[] = [];
+    for (let e of model) {
+      let item = e;
+      if (e.id == null) {
+        item = Object.assign({}, item, {id: this.appointmentIdGenerator++, orderId: orderId});
+        this.appointments.push(item);
+      }
+      generated.push(item);
+    }
+    return generated;
+  }
+
+  public getOrder(customerId: number): Observable<Order> {
+    let filtered = this.orders.filter(order => order.appointments != null && order.appointments.filter(c => c.customerId == customerId).length != 0);
+    if (filtered.length > 0) {
+      return Observable.of(filtered[0]);
+    } else {
+      return Observable.of(null);
+    }
+  }
+
+  public createOrder(order: Order): Observable<Order> {
+    let orderId = order.id == null ? this.orderIdGenerator++ : order.id;
+    let savedOrder: Order = {
+      id: orderId,
+      title: order.title,
+      appointments: this.saveAppointments(orderId, order.appointments)
+    };
+    return Observable.of(savedOrder);
+  }
+
+  private static createAppointmentsRepo(): Appointment[] {
       const dateObj = new Date();
       let yearMonth = dateObj.getUTCFullYear() + '-' + (dateObj.getUTCMonth() + 1);
       const day = dateObj.getUTCDate();
@@ -89,74 +119,16 @@ export class AppointmentServiceMock implements AppointmentService {
             start: yearMonth + (day) + 'T10:30:00',
           },
         ];
-    /*
-          {
-            id: 2,
-            start: yearMonth + (day-2) + 'T10:30:00',
-            end: yearMonth + (day-2) + 'T12:30:00',
-            capacity: 8
-          },
-          {
-            id: 3,
-            start: yearMonth + (day-2) + 'T14:00:00',
-            end: yearMonth + (day-2) + 'T16:00:00',
-            capacity: 8
-          },
-          {
-            id: 4,
-            start: yearMonth + (day-1) + 'T16:30:00',
-            end: yearMonth + (day-1) + 'T18:30:00',
-            capacity: 8
-          },
-          {
-            id: 5,
-            start: yearMonth + (day-1) + 'T08:00:00',
-            end: yearMonth + (day-1) + 'T10:00:00',
-            capacity: 8
-          },
-          {
-            id: 6,
-            start: yearMonth + (day-1) + 'T10:30:00',
-            end: yearMonth + (day-1) + 'T12:30:00',
-            capacity: 8
-          },
-          {
-            id: 7,
-            start: yearMonth + (day-1) + 'T14:00:00',
-            end: yearMonth + (day-1) + 'T16:00:00',
-            capacity: 8
-          },
-          {
-            id: 8,
-            start: yearMonth + (day-1) + 'T16:30:00',
-            end: yearMonth + (day-1) + 'T18:30:00',
-            capacity: 8
-          },
-          {
-            id: 9,
-            start: yearMonth + (day) + 'T08:00:00',
-            end: yearMonth + (day) + 'T10:00:00',
-            capacity: 8
-          },
-          {
-            id: 10,
-            start: yearMonth + (day) + 'T10:30:00',
-            end: yearMonth + (day) + 'T12:30:00',
-            capacity: 8
-          },
-          {
-            id: 11,
-            start: yearMonth + (day-1) + 'T14:00:00',
-            end: yearMonth + (day) + 'T16:00:00',
-            capacity: 8
-          },
-          {
-            id: 12,
-            start: yearMonth + (day) + 'T16:30:00',
-            end: yearMonth + (day) + 'T18:30:00',
-            capacity: 8
-          },
-        ];
-        */
     }
+
+  private static createOrdersRepo(appointments: Appointment[]): Order[] {
+    return [
+      {
+        id: 1,
+        title: 'mercredi 20 décembre 2017 à 09:56:34 GMT+01:00',
+        appointments: appointments.filter(a => a.orderId == 1)
+      }
+    ]
+  }
+
 }

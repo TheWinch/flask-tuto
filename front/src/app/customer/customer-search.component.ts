@@ -48,7 +48,6 @@ export class CustomerSearchComponent implements OnInit {
   }
 
   onSelect(customer: Customer): void {
-    console.log('Customer has been selected: ' + JSON.stringify(customer));
     this.selected.next(customer);
     // This will reset the search list
     this.searchBox.nativeElement.value = '';

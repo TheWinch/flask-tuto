@@ -8,10 +8,10 @@
           <strong>Clients dans la commande</strong>
       </div>
       <div class="panel-body">
-        <osc-customer-list [currentSelection]="currentCustomer" [customerAppointments]="appointments" (selected)="onCustomerSelected($event)"></osc-customer-list>
+        <osc-customer-list [currentSelection]="currentCustomer" [customerChoices]="choices" (selected)="onCustomerSelected($event)"></osc-customer-list>
         <osc-customer-search (selected)="onCustomerAdded($event)"></osc-customer-search>
         <button class="btn btn-block btn-success mt-3" type="button"
-             [disabled]="appointments.length == 0 || appointments[0].appointments.length == 0"
+             [disabled]="choices.length == 0 || choices[0].choices.length == 0"
              (click)="passOrder()">
           Finaliser la commande
         </button>

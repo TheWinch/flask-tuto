@@ -20,6 +20,11 @@ import { CustomerSearchComponent } from './customer/customer-search.component';
 import { AppointmentService } from "./calendar/appointment.service";
 import { AppointmentServiceMock } from "./calendar/appointment.service.mock";
 
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+
+registerLocaleData(localeFr, 'fr');
+
 @NgModule({
   imports: [
     BrowserModule,

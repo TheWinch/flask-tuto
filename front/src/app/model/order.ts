@@ -1,46 +1,46 @@
 import {Customer} from "./customer";
 import { Arrays } from "./arrays";
 
-export class Appointment {
+export class CustomerChoice {
   start: Date;
-  eventId: string;
+  eventId: number;
 }
 
-export class CustomerAppointments {
+export class CustomerChoices {
   customer: Customer;
-  private _appointments: Appointment[];
+  private _choices: CustomerChoice[];
 
-  get sorted_appointments() {
-    return this._appointments.sort((a, b) => a.start < b.start ? -1 : 1);
+  get sorted_choices() {
+    return this._choices.sort((a, b) => a.start < b.start ? -1 : 1);
   }
 
-  get appointments() {
-    return this._appointments;
+  get choices() {
+    return this._choices;
   }
 
-  hasAppointment(event: any): boolean {
-    return this._appointments.reduce((contains, a) => contains || a.eventId === event._id, false);
+  hasChosenEvent(event: any): boolean {
+    return this._choices.reduce((contains, a) => contains || a.eventId === event.id, false);
   }
 
-  addAppointment(event: any): CustomerAppointments {
-    if (this.hasAppointment(event)) {
+  selectEvent(event: any): CustomerChoices {
+    if (this.hasChosenEvent(event)) {
       return this;
     }
-    let newAppointments = Arrays.append(this._appointments, {start: event.start, eventId: event._id});
-    return new CustomerAppointments(
+    let newAppointments = Arrays.append(this._choices, {start: event.start, eventId: event.id});
+    return new CustomerChoices(
       this.customer,
       newAppointments);
   }
 
-  removeAppointment(event: any): CustomerAppointments {
-    return new CustomerAppointments(
+  unselectEvent(event: any): CustomerChoices {
+    return new CustomerChoices(
       this.customer,
-      Arrays.removeMatching(this._appointments, a => a.eventId === event._id)
+      Arrays.removeMatching(this._choices, a => a.eventId === event.id)
     );
   }
 
-  constructor(customer: Customer, appointments: Appointment[]) {
+  constructor(customer: Customer, appointments: CustomerChoice[]) {
     this.customer = customer;
-    this._appointments = appointments;
+    this._choices = appointments;
   }
 }

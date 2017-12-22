@@ -1,10 +1,10 @@
-import { Injectable } from '@angular/core';
-import { ProtoCustomer, Customer } from './model/customer';
-import { HttpHeaders, HttpClient } from '@angular/common/http';
+import {Injectable} from "@angular/core";
+import {Customer, ProtoCustomer} from "./model/customer";
+import {HttpClient, HttpHeaders} from "@angular/common/http";
 
-import { Observable } from 'rxjs/Observable';
-import { of } from 'rxjs/observable/of';
-import { catchError, map, tap } from 'rxjs/operators';
+import {Observable} from "rxjs/Observable";
+import {of} from "rxjs/observable/of";
+import {catchError, tap} from "rxjs/operators";
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
