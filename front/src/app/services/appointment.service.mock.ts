@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from "@angular/core";
 
-import { Observable } from 'rxjs/Observable';
-import { of } from 'rxjs/observable/of';
+import {Observable} from "rxjs/Observable";
 
-import {AppointmentService, Appointment, Order} from "./appointment.service";
+import {Appointment, Order} from "../model/order";
+import {AppointmentService} from "./appointment.service";
+
 
 @Injectable()
 export class AppointmentServiceMock implements AppointmentService {
@@ -15,21 +16,6 @@ export class AppointmentServiceMock implements AppointmentService {
   constructor() {
     this.appointments = AppointmentServiceMock.createAppointmentsRepo();
     this.orders = AppointmentServiceMock.createOrdersRepo(this.appointments);
-  }
-
-  public getAppointments(): Observable<Appointment[]> {
-      return of(this.appointments);
-  }
-
-  public getAppointmentsByCustomer(start: Date, end: Date, customerId: number): Observable<Appointment[]> {
-    return of(this.appointments.filter(event => {
-        let d = new Date(event.start);
-        return event.customerId === customerId && d >= start && d < end;
-      }));
-  }
-
-  public createAppointments(model: Appointment[]): Observable<Appointment[]> {
-    return of(this.saveAppointments(0, model));
   }
 
   /**
@@ -46,15 +32,6 @@ export class AppointmentServiceMock implements AppointmentService {
       generated.push(item);
     }
     return generated;
-  }
-
-  public getOrder(customerId: number): Observable<Order> {
-    let filtered = this.orders.filter(order => order.appointments != null && order.appointments.filter(c => c.customerId == customerId).length != 0);
-    if (filtered.length > 0) {
-      return Observable.of(filtered[0]);
-    } else {
-      return Observable.of(null);
-    }
   }
 
   public getOrders(): Observable<Order[]> {
@@ -88,15 +65,15 @@ export class AppointmentServiceMock implements AppointmentService {
             id: 1,
             customerId: 1,
             orderId: 1,
-            slotId: 1,
-            start: yearMonth + (day - 2) + 'T08:00:00',
+            slotId: 2,
+            start: yearMonth + (day - 2) + 'T10:30:00',
           },
           {
             id: 2,
             customerId: 2,
             orderId: 1,
-            slotId: 1,
-            start: yearMonth + (day - 2) + 'T08:00:00',
+            slotId: 2,
+            start: yearMonth + (day - 2) + 'T10:30:00',
           },
           {
             id: 3,

@@ -12,7 +12,6 @@ export class AppComponent {
   customer: Customer;
 
   onCustomerSelected(customer: Customer): void {
-    console.log('received customer: ' + JSON.stringify(customer));
     this.customer = customer;
   }
 }

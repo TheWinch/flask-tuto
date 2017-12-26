@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ProtoCustomer, Customer } from './model/customer';
+import { Customer } from '../model/customer';
 import { CustomerService } from './customer.service';
 
 import { Observable } from 'rxjs/Observable';
@@ -43,7 +43,7 @@ export class CustomerServiceMock implements CustomerService {
     return of();
   }
 
-  createCustomer(customer: ProtoCustomer): Observable<Customer> {
+  createCustomer(customer: Customer): Observable<Customer> {
     const created = {
         id: this.nextId++,
         firstName: customer.firstName,

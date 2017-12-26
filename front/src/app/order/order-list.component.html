@@ -27,7 +27,7 @@
       </thead>
       <tbody>
       <tr *ngFor="let order of orders$ | async">
-        <td><a (click)="editOrder(order)" href="#">Modifier</a></td>
+        <td><a (click)="editOrder(order)" class="badge badge-pill badge-primary">Modifier</a></td>
         <td>{{ order.title }}</td>
         <td>{{ order.appointments.length}}</td>
         <td>{{ order.contact }}</td>

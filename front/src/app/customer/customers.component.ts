@@ -3,13 +3,13 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { concat } from 'rxjs/observable/concat';
 import { Subject }    from 'rxjs/Subject';
- 
+
 import {
    debounceTime, distinctUntilChanged, switchMap
  } from 'rxjs/operators';
 
 import { Customer } from '../model/customer';
-import { CustomerService } from '../customer.service';
+import { CustomerService } from '../services/customer.service';
 
 @Component({
   selector: 'customers',
@@ -42,10 +42,10 @@ export class CustomersComponent implements OnInit {
         this.searchTerms.pipe(
       // wait 300ms after each keystroke before considering the term
       debounceTime(300),
- 
+
       // ignore new term if same as previous term
       distinctUntilChanged(),
- 
+
       // switch to new search observable each time the term changes
       switchMap((term: string) => this.customerService.searchCustomers(term))
     ));

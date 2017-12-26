@@ -1,13 +1,12 @@
-from flask_restplus import Resource, fields, reqparse, cors
-from flask import request, make_response
-from functools import wraps
+from flask_restplus import Resource, fields, reqparse
+from flask import request
 
 from app import models
 from . import api
 
 ns = api.namespace('customers', description='Customers operations')
 
-customer_model = api.model('Customer', {
+customer_model = ns.model('Customer', {
     'id': fields.Integer(readOnly=True),
     'firstName': fields.String(attribute='firstname'),
     'lastName': fields.String(attribute='lastname'),
@@ -17,7 +16,7 @@ customer_model = api.model('Customer', {
 })
 
 
-@ns.route('', '/')
+@ns.route('/')
 class CustomerList(Resource):
     @ns.marshal_list_with(customer_model)
     def get(self):

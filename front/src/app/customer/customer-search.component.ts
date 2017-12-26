@@ -8,8 +8,8 @@ import {
   debounceTime, distinctUntilChanged, switchMap, tap
 } from 'rxjs/operators';
 
-import { CustomerService } from '../customer.service';
-import { ProtoCustomer, Customer } from '../model/customer';
+import { CustomerService } from '../services/customer.service';
+import { Customer } from '../model/customer';
 
 @Component({
   selector: 'osc-customer-search',
@@ -18,7 +18,7 @@ import { ProtoCustomer, Customer } from '../model/customer';
 })
 export class CustomerSearchComponent implements OnInit {
   // New customer creation fields
-  newCustomer: ProtoCustomer;
+  newCustomer: Customer;
 
   // Emitted when the user selects or creates a customer
   @Output() public selected: EventEmitter<Customer> = new EventEmitter<Customer>();

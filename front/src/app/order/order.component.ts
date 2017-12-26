@@ -1,18 +1,20 @@
 import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from "@angular/core";
 import {FullCalendarComponent} from "../calendar/fullcalendar.component";
-import {Options} from "fullcalendar";
 
 import {Customer} from "../model/customer";
-import {EventService, Event} from "../calendar/event.service";
+import {Event} from "../model/event";
+import {Appointment, CustomerChoices, Order} from "../model/order";
 import {Arrays} from "../model/arrays";
-import {CustomerChoices} from "../model/order";
-import {Appointment, AppointmentService, Order} from "../calendar/appointment.service";
-import {CustomerService} from "../customer.service";
+import {EventService} from "../services/event.service";
+import {AppointmentService} from "../services/appointment.service";
+import {CustomerService} from "../services/customer.service";
+
+import {Options} from "fullcalendar";
 import {Observable} from "rxjs/Observable";
 import {forkJoin} from "rxjs/observable/forkJoin";
 import {of} from "rxjs/observable/of";
-import DateTimeFormatOptions = Intl.DateTimeFormatOptions;
 import {DatePipe} from "@angular/common";
+import DateTimeFormatOptions = Intl.DateTimeFormatOptions;
 
 
 @Component({
@@ -28,6 +30,7 @@ export class OrderComponent implements OnInit {
   @Output() created = new EventEmitter();
   @Output() aborted = new EventEmitter();
   currentCustomer: Customer;
+  contact: number = 0;
   choices: CustomerChoices[] = [];
 
   constructor(private eventService: EventService,
@@ -35,10 +38,9 @@ export class OrderComponent implements OnInit {
               private customerService: CustomerService) {}
 
   passOrder() {
-    let order = this.toOrder(this.choices);
+    let order = this.toOrder(this.choices, this.contact);
     this.appointmentService.createOrder(order).subscribe(data => {
       this.created.emit(data);
-      console.log(data);
     }, failure => {
     })
   }
@@ -55,6 +57,9 @@ export class OrderComponent implements OnInit {
     // if it isn't in the list already
     if (this.choices.reduce((contains, ca) => contains && ca.customer.id !== customer.id, true)) {
       this.choices = Arrays.append(this.choices, new CustomerChoices(customer, []));
+      if (this.contact == 0) {
+        this.contact = customer.id;
+      }
     }
     this.switchCustomer(customer);
   }
@@ -93,8 +98,6 @@ export class OrderComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log('Order detail initializing');
-    console.log(this.order);
     let appointments = this.order != null ? this.order.appointments : [];
     let distinctSlots = new Set<number>(appointments.map(a => a.slotId));
     let orderObservable: Observable<Customer[]> = this.getCustomersForAppointments(appointments);
@@ -109,15 +112,11 @@ export class OrderComponent implements OnInit {
             .map(a => {
               return {
                 eventId: a.slotId,
-                start: new Date(a.start)
+                start: new Date(a.start) // TODO - use event's start date instead
               }
             })
         ));
-        console.log('Choices');
-        console.log(this.choices);
         let coloredEvents = OrderComponent.buildEvents(distinctSlots, data[1]);
-        console.log('Events');
-        console.log(coloredEvents);
         this.calendarOptions = OrderComponent.makeCalendarOptions(coloredEvents);
       });
   }
@@ -165,7 +164,7 @@ export class OrderComponent implements OnInit {
     return customerQueries.length > 0 ? forkJoin(...customerQueries) : of([]);
   }
 
-  private toOrder(choices: CustomerChoices[]): Order {
+  private toOrder(choices: CustomerChoices[], contact: number): Order {
     let order = this.order;
     let reducer = function (appointments: Appointment[], cc: CustomerChoices): Appointment[] {
       let mapped: Appointment[] = cc.choices.map(choice => {
@@ -181,6 +180,7 @@ export class OrderComponent implements OnInit {
 
     return {
       title: new DatePipe('fr').transform(new Date(), 'full'),
+      contactId: contact,
       appointments: choices.reduce(reducer, [])
     }
   }

@@ -11,14 +11,14 @@ import {CustomersComponent} from "./customer/customers.component";
 import {OrderComponent} from "./order/order.component";
 import {OrderCustomerListComponent} from "./order/customer-list.component";
 import {CustomerDetailComponent} from "./customer/customer-detail.component";
-import {CustomerService} from "./customer.service";
-import {CustomerServiceMock} from "./customer.service.mock";
-import {EventService} from "./calendar/event.service";
-import {EventServiceMock} from "./calendar/event.service.mock";
+import {CustomerService, HttpCustomerService} from "./services/customer.service";
+import {CustomerServiceMock} from "./services/customer.service.mock";
+import {EventService, HttpEventService} from "./services/event.service";
+import {EventServiceMock} from "./services/event.service.mock";
 import {TimeSlotViewComponent} from "./calendar/timeslotview.component";
 import {CustomerSearchComponent} from "./customer/customer-search.component";
-import {AppointmentService} from "./calendar/appointment.service";
-import {AppointmentServiceMock} from "./calendar/appointment.service.mock";
+import {AppointmentService, HttpAppointmentService} from "./services/appointment.service";
+import {AppointmentServiceMock} from "./services/appointment.service.mock";
 import {OrderListComponent} from "./order/order-list.component";
 import {MessagesComponent} from "./messages/messages.component";
 
@@ -66,9 +66,12 @@ registerLocaleData(localeFr, 'fr');
     MessagesComponent
   ],
   providers: [
-    { provide: CustomerService, useValue: new CustomerServiceMock() },
-    { provide: EventService, useValue: new EventServiceMock() },
-    { provide: AppointmentService, useValue: new AppointmentServiceMock() }
+    { provide: CustomerService, useClass: HttpCustomerService },
+    { provide: EventService, useClass: HttpEventService },
+    { provide: AppointmentService, useClass: HttpAppointmentService },
+    //{ provide: CustomerService, useValue: new CustomerServiceMock() },
+    //{ provide: EventService, useValue: new EventServiceMock() },
+    //{ provide: AppointmentService, useValue: new AppointmentServiceMock() }
   ],
   bootstrap: [AppComponent]
 })

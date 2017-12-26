@@ -1,7 +1,6 @@
-from flask_restplus import Resource, fields, reqparse
-from flask import request, url_for
+from flask_restplus import Resource, fields
+from flask import request
 
-from dateutil.parser import parse
 
 from app import models
 from . import api
@@ -9,7 +8,7 @@ from . import api
 ns = api.namespace('appointments', description='Appointment operations')
 
 
-appointment_model = api.model('Appointment', {
+appointment_model = ns.model('Appointment', {
     'id': fields.Integer(readOnly=True),
     'start': fields.DateTime(attribute='timeslot.start'),
     'duration': fields.Integer(attribute='timeslot.duration'),
@@ -20,7 +19,7 @@ appointment_model = api.model('Appointment', {
 })
 
 
-@ns.route('', '/')
+@ns.route('/')
 class AppointmentList(Resource):
     @ns.marshal_list_with(appointment_model)
     def get(self):
