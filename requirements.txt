@@ -14,3 +14,5 @@ flipflop==1.0
 guess-language==0.2
 coverage==4.4.2
 celery==4.1.0
+gunicorn==19.7.1
+psycopg2==2.7.3.2
