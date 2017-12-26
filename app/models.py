@@ -1,5 +1,6 @@
 from app import db
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
+from dateutil.parser import parse
 
 
 class Customer(db.Model):
@@ -122,11 +123,18 @@ class TimeSlot(db.Model):
 
     @staticmethod
     def load_all():
-        return TimeSlot.query.all()
+        return TimeSlot.query.order_by(TimeSlot.start).all()
 
     @staticmethod
     def load(oid):
         return TimeSlot.query.get(oid)
+
+    @staticmethod
+    def load_by_date(start, end=None):
+        if end is not None:
+            return TimeSlot.query.filter(and_(TimeSlot.start >= parse(start), TimeSlot.start <= parse(end))).order_by(TimeSlot.start).all()
+        else:
+            return TimeSlot.query.filter(TimeSlot.start >= parse(start)).order_by(TimeSlot.start).all()
 
     def create(self):
         db.session.add(self)

@@ -76,7 +76,8 @@ export class TimeSlotViewComponent implements OnInit {
             // the order view)
             Object.assign(e, {
               borderColor: '',
-              backgroundColor: ''
+              backgroundColor: '',
+              title: e.used + ' client' + (e.used !== 1 ? 's' : '')
           })
           });
           callback(data);

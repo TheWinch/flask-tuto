@@ -1,4 +1,4 @@
-from flask_restplus import Resource, fields
+from flask_restplus import Resource, fields, reqparse
 from flask import request
 
 from dateutil.parser import parse
@@ -30,11 +30,21 @@ class DateTimeFromDuration(fields.DateTime):
             raise fields.MarshallingError(msg)
         return self.mask.apply(data) if self.mask else data
 
+
+class UsedCapacity(fields.Raw):
+    def __init__(self, **kwargs):
+        super(UsedCapacity, self).__init__(**kwargs)
+
+    def output(self, key, obj):
+        return len(fields.get_value('appointments', obj))
+
+
 timeslot_model = ns.model('TimeSlot', {
     'id': fields.Integer(readOnly=True),
     'start': fields.DateTime,
     'end': DateTimeFromDuration(duration_attribute='duration', attribute='start'),
     'trainers': fields.String,
+    'used': UsedCapacity(),
     'capacity': fields.Integer(attribute='free_capacity'),
     'uri': fields.Url('api.timeslot_ep')
 })
@@ -44,7 +54,13 @@ timeslot_model = ns.model('TimeSlot', {
 class TimeslotList(Resource):
     @ns.marshal_list_with(timeslot_model)
     def get(self):
-        """Get the list of all timeslots"""
+        """Get the list of all timeslots, possibly filtered by date"""
+        parser = reqparse.RequestParser()
+        parser.add_argument('start')
+        parser.add_argument('end')
+        args = parser.parse_args()
+        if args['start'] is not None:
+            return models.TimeSlot.load_by_date(args['start'], args['end'])
         return models.TimeSlot.load_all()
 
     @ns.marshal_list_with(timeslot_model, code=201)
@@ -89,3 +105,31 @@ class Timeslot(Resource):
         """Delete a particular timeslot"""
         models.TimeSlot.load(id).delete()
         return '', 204
+
+    def put(self, id):
+        """Updates all non-readonly fields of a timeslot"""
+        data = request.json
+        start = parse(data['start'])
+        end = parse(data['end'])
+        duration = end - start
+        capacity = int(data['capacity'])
+        t = models.TimeSlot.load(id)
+        t.start = start
+        t.duration = duration.total_seconds()
+        if capacity < len(t.appointments):
+            return 'Capacity must not be lower than remaining capacity', 400
+        t.capacity = capacity
+        t.trainers = data['trainers']
+        t.update()
+        return '', 204
+
+    def patch(self, id):
+        """Updates the start and end of a timeslot"""
+        data = request.json
+        t = models.TimeSlot.load(id)
+        t.start = parse(data['start'])
+        end = parse(data['end'])
+        t.duration = (end - t.start).total_seconds()
+        t.update()
+        return '', 204
+

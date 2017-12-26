@@ -1,7 +1,8 @@
 
 <div class="row mt-3">
   <div class="col-md">
-    <osc-fullcalendar #ucCalendar [options]="calendarOptions" (eventClick)="addOrRemoveEvent($event.detail)"></osc-fullcalendar>
+    <osc-fullcalendar #ucCalendar [options]="calendarOptions" (eventClick)="addOrRemoveEvent($event.detail)" *ngIf="calendarOptions != null else noData"></osc-fullcalendar>
+    <ng-template #noData>Chargement du calendrier en cours...</ng-template>
   </div>
   <div class="col-md-3 panel panel-default">
       <div class="panel-heading text-center mb-3">

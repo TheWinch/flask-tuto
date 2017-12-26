@@ -5,4 +5,5 @@ export class Event {
   start: string | Date;
   end?: string | Date;
   capacity?: number;
+  used?: number;
 }

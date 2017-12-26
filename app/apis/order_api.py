@@ -89,3 +89,12 @@ class Order(Resource):
         """Delete a particular order"""
         models.Order.load(id).delete()
         return '', 204
+
+    def put(self, id):
+        """Replaces the order with a new definition"""
+
+        # TODO:
+        # go through all existing appointments and find those deleted, delete them
+        # go through all new appointments and find those without id, create them
+        return 'Not implemented', 400
+

@@ -39,8 +39,8 @@ export class HttpEventService implements EventService {
     return this.http.post<Event[]>(this.url, JSON.stringify(events), httpOptions);
   }
 
-  updateEvent(event: Event): Observable<Event> {
-    return this.http.patch<Event>(this.url, JSON.stringify(event), httpOptions);
+  updateEvent(id: number, start: Date, end: Date): Observable<Event> {
+    return this.http.patch<Event>(this.url+id, JSON.stringify({start: start, end: end}), httpOptions);
   }
 
   private handleError<T>(operation = 'operation', result ?: T) {
