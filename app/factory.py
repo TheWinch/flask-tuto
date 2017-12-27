@@ -17,8 +17,8 @@ def create_app(cfg=None):
     from config import config
     config_name = os.getenv('FLASK_CONFIG') or 'default'
     app.config.from_object(config[config_name])
-
     db.init_app(app)
+
     register_blueprints(app)
 
     return app
