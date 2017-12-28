@@ -15,7 +15,7 @@ from . import db
 def create_app(cfg=None):
     app = Flask('osc')
     from config import config
-    config_name = os.getenv('FLASK_CONFIG') or 'default'
+    config_name = cfg or os.getenv('FLASK_CONFIG') or 'default'
     app.config.from_object(config[config_name])
     db.init_app(app)
 

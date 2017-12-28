@@ -36,7 +36,7 @@ export class HttpEventService implements EventService {
   }
 
   createEvents(events: Event[]): Observable<Event[]> {
-    return this.http.post<Event[]>(this.url, JSON.stringify(events), httpOptions);
+    return this.http.post<Event[]>(this.url + 'batch', JSON.stringify(events), httpOptions);
   }
 
   updateEvent(id: number, start: Date, end: Date): Observable<Event> {

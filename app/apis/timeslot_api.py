@@ -1,8 +1,10 @@
-from flask_restplus import Resource, fields, reqparse
-from flask import request
+from flask_restplus import Resource, fields, reqparse, abort
+from flask import request, url_for
 
 from dateutil.parser import parse
 from datetime import timedelta
+
+from sqlalchemy.exc import IntegrityError
 
 from app import models
 from . import api
@@ -36,7 +38,10 @@ class UsedCapacity(fields.Raw):
         super(UsedCapacity, self).__init__(**kwargs)
 
     def output(self, key, obj):
-        return len(fields.get_value('appointments', obj))
+        value = fields.get_value('appointments', obj)
+        if value is None:
+            value = []
+        return len(value)
 
 
 timeslot_model = ns.model('TimeSlot', {
@@ -63,22 +68,17 @@ class TimeslotList(Resource):
             return models.TimeSlot.load_by_date(args['start'], args['end'])
         return models.TimeSlot.load_all()
 
-    @ns.marshal_list_with(timeslot_model, code=201)
+    @ns.marshal_with(timeslot_model)
+    @ns.response(409, 'Time slot cannot be created because a similar time slot already exists')
+    @ns.response(201, 'Time slot has been created')
     def post(self):
         """Create a new timeslot"""
         data = request.json
-        result = []
-
         try:
-            iterator = iter(data)
-        except TypeError:
-            # single element was provided
-            result.append(self.create_single(data))
-        else:
-            for d in iterator:
-                result.append(self.create_single(d))
-
-        return result, 201
+            timeslot = self.create_single(data)
+            return timeslot, 201, {'Location': url_for('api.timeslot_ep', id=timeslot.id)}
+        except IntegrityError:
+            abort(409)
 
     @staticmethod
     def create_single(data):
@@ -92,6 +92,24 @@ class TimeslotList(Resource):
         return t
 
 
+@ns.route('/batch')
+class TimeslotListCreateBatch(Resource):
+    @ns.marshal_list_with(timeslot_model)
+    @ns.response(409, 'At least 1 time slot cannot be created because a similar time slot already exists')
+    @ns.response(201, 'All Time slots have been created')
+    def post(self):
+        """Creates a batch of timeslots in a single operation. The operation will fail if a single element in the
+        batch cannot be created."""
+        data = request.json
+        result = []
+        try:
+            for t in data:
+                result.append(TimeslotList.create_single(t))
+        except IntegrityError:
+            abort(409)
+        return result, 201
+
+
 @ns.route('/<int:id>', endpoint='timeslot_ep')
 @ns.response(404, 'Time slot not found')
 @ns.param('id', 'The timeslot identifier')
@@ -99,13 +117,21 @@ class Timeslot(Resource):
     @ns.marshal_with(timeslot_model)
     def get(self, id):
         """Get a particular timeslot"""
-        return models.TimeSlot.load(id)
+        loaded = models.TimeSlot.load(id)
+        if loaded is None:
+            abort(404)
+        return loaded
 
+    @ns.response(204, 'Time slot has been deleted')
     def delete(self, id):
         """Delete a particular timeslot"""
-        models.TimeSlot.load(id).delete()
+        loaded = models.TimeSlot.load(id)
+        if loaded is None:
+            return '', 404
+        loaded.delete()
         return '', 204
 
+    @ns.response(204, 'Time slot has been updated')
     def put(self, id):
         """Updates all non-readonly fields of a timeslot"""
         data = request.json
@@ -114,6 +140,8 @@ class Timeslot(Resource):
         duration = end - start
         capacity = int(data['capacity'])
         t = models.TimeSlot.load(id)
+        if t is None:
+            return '', 404
         t.start = start
         t.duration = duration.total_seconds()
         if capacity < len(t.appointments):
@@ -123,10 +151,13 @@ class Timeslot(Resource):
         t.update()
         return '', 204
 
+    @ns.response(204, 'Time slot has been updated')
     def patch(self, id):
         """Updates the start and end of a timeslot"""
         data = request.json
         t = models.TimeSlot.load(id)
+        if t is None:
+            return '', 404
         t.start = parse(data['start'])
         end = parse(data['end'])
         t.duration = (end - t.start).total_seconds()
