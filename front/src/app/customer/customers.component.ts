@@ -10,6 +10,8 @@ import {
 
 import { Customer } from '../model/customer';
 import { CustomerService } from '../services/customer.service';
+import {MonoTypeOperatorFunction, OperatorFunction} from "rxjs/interfaces";
+
 
 @Component({
   selector: 'customers',
@@ -18,8 +20,8 @@ import { CustomerService } from '../services/customer.service';
 })
 export class CustomersComponent implements OnInit {
   customers$: Observable<Customer[]>;
+  page: number = 1;
   private searchTerms = new Subject<string>();
-  selectedCustomer: Customer;
 
   constructor(private customerService: CustomerService) { }
 
@@ -32,8 +34,10 @@ export class CustomersComponent implements OnInit {
     this.getCustomers();
   }
 
-  onSelect(customer: Customer): void {
-    this.selectedCustomer = customer;
+  createCustomer(): void {
+  }
+
+  deleteCustomer(customer: Customer): void {
   }
 
   getCustomers(): void {
@@ -47,7 +51,12 @@ export class CustomersComponent implements OnInit {
       distinctUntilChanged(),
 
       // switch to new search observable each time the term changes
-      switchMap((term: string) => this.customerService.searchCustomers(term))
+      switchMap((term: string) => {
+        if(term != null && term.trim() !== '')
+          return this.customerService.searchCustomers(term)
+        else
+          return Observable.of([])
+      })
     ));
   }
 }
