@@ -2,7 +2,7 @@ import unittest
 
 from datetime import datetime
 
-from apis.timeslot_api import timeslot_model
+from app.apis.timeslot_api import timeslot_model
 from app.models import TimeSlot
 from app.tests.base import FlaskTestCase, BasicAPITester
 

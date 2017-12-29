@@ -6,4 +6,4 @@ api = Api(api_blueprint, version='1.0', title='Schedule Mapper API',
           description='A simple API for the schedule mapper',
           doc='/doc/')
 
-from . import customer_api, timeslot_api, appointments_api, order_api
+from . import customer_api, timeslot_api, order_api

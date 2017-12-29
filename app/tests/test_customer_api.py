@@ -2,7 +2,7 @@ import unittest
 
 from flask import json
 
-from apis.customer_api import customer_model
+from app.apis.customer_api import customer_model
 from app.models import Customer
 from app.tests.base import FlaskTestCase, BasicAPITester
 

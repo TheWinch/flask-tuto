@@ -1,7 +1,6 @@
 from flask_restplus import Resource, fields
 from flask import request
 
-from datetime import timedelta
 
 from app import models, db
 from . import api
@@ -10,16 +9,16 @@ ns = api.namespace('orders', description='Orders operations')
 
 
 class FirstAndLastName(fields.Raw):
-    '''
+    """
     Extracts the first name and last name from the field given as attribute
-    '''
+    """
     def __init__(self, **kwargs):
         super(FirstAndLastName, self).__init__(**kwargs)
 
     def output(self, key, obj):
-        actualKey = key if self.attribute is None else self.attribute
-        firstname = fields.get_value(actualKey + '.firstname', obj)
-        lastname = fields.get_value(actualKey + '.lastname', obj)
+        actual_key = key if self.attribute is None else self.attribute
+        firstname = fields.get_value(actual_key + '.firstname', obj)
+        lastname = fields.get_value(actual_key + '.lastname', obj)
         value = None if firstname is None else firstname + ' ' + lastname
 
         if value is None:
