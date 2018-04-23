@@ -1,7 +1,7 @@
 import {Component, Input, EventEmitter, Output, ChangeDetectionStrategy} from '@angular/core';
 
 import { Customer } from '../model/customer';
-import { CustomerChoices } from "../model/order";
+import { CustomerChoices } from '../model/order';
 
 @Component({
   selector: 'osc-customer-list',

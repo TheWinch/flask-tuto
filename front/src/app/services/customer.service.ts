@@ -1,10 +1,10 @@
-import {Injectable} from "@angular/core";
-import {Customer} from "../model/customer";
-import {HttpClient, HttpHeaders} from "@angular/common/http";
+import {Injectable} from '@angular/core';
+import {Customer} from '../model/customer';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 
-import {Observable} from "rxjs/Observable";
-import {of} from "rxjs/observable/of";
-import {catchError} from "rxjs/operators";
+import {Observable} from 'rxjs/Observable';
+import {of} from 'rxjs/observable/of';
+import {catchError} from 'rxjs/operators';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -57,6 +57,6 @@ export class HttpCustomerService implements CustomerService {
     return (error: any): Observable<T> => {
         console.error(`${operation} failed`, error);
         return of(result as T);
-    }
+    };
   }
 }

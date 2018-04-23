@@ -1,5 +1,5 @@
-import {Customer} from "./customer";
-import { Arrays } from "./arrays";
+import {Customer} from './customer';
+import { Arrays } from './arrays';
 
 export class CustomerChoice {
   start: Date;
@@ -26,7 +26,7 @@ export class CustomerChoices {
     if (this.hasChosenEvent(event)) {
       return this;
     }
-    let newAppointments = Arrays.append(this._choices, {start: event.start, eventId: event.id});
+    const newAppointments = Arrays.append(this._choices, {start: event.start, eventId: event.id});
     return new CustomerChoices(
       this.customer,
       newAppointments);

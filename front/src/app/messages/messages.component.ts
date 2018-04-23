@@ -11,7 +11,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class MessagesComponent implements OnInit {
   messages: IAlert[] = [];
-  messageIndex: number = 0;
+  messageIndex = 0;
 
   constructor() { }
 

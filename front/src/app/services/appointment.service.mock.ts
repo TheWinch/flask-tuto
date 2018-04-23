@@ -1,17 +1,107 @@
-import {Injectable} from "@angular/core";
+import {Injectable} from '@angular/core';
 
-import {Observable} from "rxjs/Observable";
+import {Observable} from 'rxjs/Observable';
 
-import {Appointment, Order} from "../model/order";
-import {AppointmentService} from "./appointment.service";
+import {Appointment, Order} from '../model/order';
+import {AppointmentService} from './appointment.service';
 
 
 @Injectable()
 export class AppointmentServiceMock implements AppointmentService {
   private appointments: Appointment[];
-  private appointmentIdGenerator: number = 11;
+  private appointmentIdGenerator = 11;
   private orders: Order[];
-  private orderIdGenerator: number = 2;
+  private orderIdGenerator = 2;
+
+  private static createAppointmentsRepo(): Appointment[] {
+    const dateObj = new Date();
+    let yearMonth = dateObj.getUTCFullYear() + '-' + (dateObj.getUTCMonth() + 1) + '-';
+    const day = dateObj.getUTCDate();
+    const dayStr = '' + day;
+    if (dayStr.length === 1) {
+      yearMonth = yearMonth + '0';
+    }
+      return [
+        {
+          id: 1,
+          customerId: 1,
+          orderId: 1,
+          slotId: 2,
+          start: yearMonth + (day - 2) + 'T10:30:00',
+        },
+        {
+          id: 2,
+          customerId: 2,
+          orderId: 1,
+          slotId: 2,
+          start: yearMonth + (day - 2) + 'T10:30:00',
+        },
+        {
+          id: 3,
+          customerId: 1,
+          orderId: 1,
+          slotId: 5,
+          start: yearMonth + (day - 1) + 'T08:00:00',
+        },
+        {
+          id: 4,
+          customerId: 2,
+          orderId: 1,
+          slotId: 5,
+          start: yearMonth + (day - 1) + 'T08:00:00',
+        },
+        {
+          id: 5,
+          customerId: 1,
+          orderId: 1,
+          slotId: 10,
+          start: yearMonth + (day) + 'T10:30:00',
+        },
+        {
+          id: 6,
+          customerId: 2,
+          orderId: 1,
+          slotId: 10,
+          start: yearMonth + (day) + 'T10:30:00',
+        },
+        {
+          id: 7,
+          customerId: 3,
+          orderId: 2,
+          slotId: 5,
+          start: yearMonth + (day) + 'T10:30:00',
+        },
+        {
+          id: 8,
+          customerId: 3,
+          orderId: 2,
+          slotId: 10,
+          start: yearMonth + (day) + 'T10:30:00',
+        },
+        {
+          id: 8,
+          customerId: 3,
+          orderId: 2,
+          slotId: 14,
+          start: yearMonth + (day + 1) + 'T10:30:00',
+        },
+      ];
+  }
+
+  private static createOrdersRepo(appointments: Appointment[]): Order[] {
+    return [
+      {
+        id: 1,
+        title: 'lundi 18 décembre 2017 à 09:56:34 GMT+01:00',
+        appointments: appointments.filter(a => a.orderId === 1)
+      },
+      {
+        id: 2,
+        title: 'mercredi 20 décembre 2017 à 13:56:34 GMT+01:00',
+        appointments: appointments.filter(a => a.orderId === 2)
+      },
+    ];
+  }
 
   constructor() {
     this.appointments = AppointmentServiceMock.createAppointmentsRepo();
@@ -23,7 +113,7 @@ export class AppointmentServiceMock implements AppointmentService {
    */
   private saveAppointments(orderId: number, model: Appointment[]): Appointment[] {
     const generated: Appointment[] = [];
-    for (let e of model) {
+    for (const e of model) {
       let item = e;
       if (e.id == null) {
         item = Object.assign({}, item, {id: this.appointmentIdGenerator++, orderId: orderId});
@@ -39,107 +129,17 @@ export class AppointmentServiceMock implements AppointmentService {
   }
 
   public searchOrders(customerId: number): Observable<Order[]> {
-    return Observable.of(this.orders.filter(o => o.appointments.some(a => a.customerId == customerId)));
+    return Observable.of(this.orders.filter(o => o.appointments.some(a => a.customerId === customerId)));
   }
 
   public createOrder(order: Order): Observable<Order> {
-    let orderId = order.id == null ? this.orderIdGenerator++ : order.id;
-    let savedOrder: Order = {
+    const orderId = order.id == null ? this.orderIdGenerator++ : order.id;
+    const savedOrder: Order = {
       id: orderId,
       title: order.title,
       appointments: this.saveAppointments(orderId, order.appointments)
     };
     return Observable.of(savedOrder);
-  }
-
-  private static createAppointmentsRepo(): Appointment[] {
-      const dateObj = new Date();
-      let yearMonth = dateObj.getUTCFullYear() + '-' + (dateObj.getUTCMonth() + 1) + '-';
-      const day = dateObj.getUTCDate();
-      const dayStr = '' + day;
-      if(dayStr.length === 1) {
-        yearMonth = yearMonth + '0';
-      }
-        return [
-          {
-            id: 1,
-            customerId: 1,
-            orderId: 1,
-            slotId: 2,
-            start: yearMonth + (day - 2) + 'T10:30:00',
-          },
-          {
-            id: 2,
-            customerId: 2,
-            orderId: 1,
-            slotId: 2,
-            start: yearMonth + (day - 2) + 'T10:30:00',
-          },
-          {
-            id: 3,
-            customerId: 1,
-            orderId: 1,
-            slotId: 5,
-            start: yearMonth + (day - 1) + 'T08:00:00',
-          },
-          {
-            id: 4,
-            customerId: 2,
-            orderId: 1,
-            slotId: 5,
-            start: yearMonth + (day - 1) + 'T08:00:00',
-          },
-          {
-            id: 5,
-            customerId: 1,
-            orderId: 1,
-            slotId: 10,
-            start: yearMonth + (day) + 'T10:30:00',
-          },
-          {
-            id: 6,
-            customerId: 2,
-            orderId: 1,
-            slotId: 10,
-            start: yearMonth + (day) + 'T10:30:00',
-          },
-          {
-            id: 7,
-            customerId: 3,
-            orderId: 2,
-            slotId: 5,
-            start: yearMonth + (day) + 'T10:30:00',
-          },
-          {
-            id: 8,
-            customerId: 3,
-            orderId: 2,
-            slotId: 10,
-            start: yearMonth + (day) + 'T10:30:00',
-          },
-          {
-            id: 8,
-            customerId: 3,
-            orderId: 2,
-            slotId: 14,
-            start: yearMonth + (day+1) + 'T10:30:00',
-          },
-        ];
-    }
-
-  private static createOrdersRepo(appointments: Appointment[]): Order[] {
-    return [
-      {
-        id: 1,
-        title: 'lundi 18 décembre 2017 à 09:56:34 GMT+01:00',
-        appointments: appointments.filter(a => a.orderId == 1)
-      },
-      {
-        id: 2,
-        title: 'mercredi 20 décembre 2017 à 13:56:34 GMT+01:00',
-        appointments: appointments.filter(a => a.orderId == 2)
-      },
-    ]
   }
 
 }

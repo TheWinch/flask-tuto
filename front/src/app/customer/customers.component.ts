@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { Observable } from 'rxjs/Observable';
 import { concat } from 'rxjs/observable/concat';
-import { Subject }    from 'rxjs/Subject';
+import { Subject } from 'rxjs/Subject';
 
 import {
    debounceTime, distinctUntilChanged, switchMap
@@ -10,17 +10,17 @@ import {
 
 import { Customer } from '../model/customer';
 import { CustomerService } from '../services/customer.service';
-import {MonoTypeOperatorFunction, OperatorFunction} from "rxjs/interfaces";
+import {MonoTypeOperatorFunction, OperatorFunction} from 'rxjs/interfaces';
 
 
 @Component({
-  selector: 'customers',
+  selector: 'osc-customers',
   templateUrl: './customers.component.html',
   styleUrls: ['./customers.component.css']
 })
 export class CustomersComponent implements OnInit {
   customers$: Observable<Customer[]>;
-  page: number = 1;
+  page = 1;
   private searchTerms = new Subject<string>();
 
   constructor(private customerService: CustomerService) { }
@@ -52,10 +52,11 @@ export class CustomersComponent implements OnInit {
 
       // switch to new search observable each time the term changes
       switchMap((term: string) => {
-        if(term != null && term.trim() !== '')
-          return this.customerService.searchCustomers(term)
-        else
-          return Observable.of([])
+        if (term != null && term.trim() !== '') {
+          return this.customerService.searchCustomers(term);
+        } else {
+          return Observable.of([]);
+        }
       })
     ));
   }

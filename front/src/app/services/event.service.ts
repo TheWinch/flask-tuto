@@ -1,10 +1,10 @@
-import {Event} from "../model/event";
+import {Event} from '../model/event';
 
-import {Observable} from "rxjs/Observable";
-import "rxjs/add/observable/of";
-import {Injectable} from "@angular/core";
-import {HttpClient, HttpHeaders} from "@angular/common/http";
-import {catchError} from "rxjs/operators";
+import {Observable} from 'rxjs/Observable';
+import 'rxjs/add/observable/of';
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {catchError} from 'rxjs/operators';
 
 export abstract class EventService {
     abstract getEvents(): Observable<Event[]>;
@@ -30,7 +30,7 @@ export class HttpEventService implements EventService {
   }
 
   getEventsByDate(start: Date, end: Date): Observable<Event[]> {
-    return this.http.get<Event[]>(`${this.url}?start=` + start.toISOString()+'&end='+end.toISOString()).pipe(
+    return this.http.get<Event[]>(`${this.url}?start=` + start.toISOString() + '&end=' + end.toISOString()).pipe(
       catchError(this.handleError('getEventsByDate', []))
     );
   }
@@ -40,13 +40,13 @@ export class HttpEventService implements EventService {
   }
 
   updateEvent(id: number, start: Date, end: Date): Observable<Event> {
-    return this.http.patch<Event>(this.url+id, JSON.stringify({start: start, end: end}), httpOptions);
+    return this.http.patch<Event>(this.url + id, JSON.stringify({start: start, end: end}), httpOptions);
   }
 
   private handleError<T>(operation = 'operation', result ?: T) {
     return (error: any): Observable<T> => {
       console.error(`${operation} failed`, error);
       return Observable.of(result as T);
-    }
+    };
   }
 }

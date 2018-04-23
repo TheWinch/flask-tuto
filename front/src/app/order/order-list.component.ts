@@ -1,11 +1,11 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {MessagesComponent} from "../messages/messages.component";
-import {AppointmentService} from "../services/appointment.service";
-import {Appointment, Order} from "../model/order";
-import {DatePipe} from "@angular/common";
+import {MessagesComponent} from '../messages/messages.component';
+import {AppointmentService} from '../services/appointment.service';
+import {Appointment, Order} from '../model/order';
+import {DatePipe} from '@angular/common';
 import { Observable } from 'rxjs/Observable';
 import { concat } from 'rxjs/observable/concat';
-import { Subject }    from 'rxjs/Subject';
+import { Subject } from 'rxjs/Subject';
 
 import {
   debounceTime, distinctUntilChanged, switchMap

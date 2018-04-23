@@ -1,19 +1,19 @@
-import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from "@angular/core";
-import {FullCalendarComponent} from "../calendar/fullcalendar.component";
+import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {FullCalendarComponent} from '../calendar/fullcalendar.component';
 
-import {Customer} from "../model/customer";
-import {Event} from "../model/event";
-import {Appointment, CustomerChoices, Order} from "../model/order";
-import {Arrays} from "../model/arrays";
-import {EventService} from "../services/event.service";
-import {AppointmentService} from "../services/appointment.service";
-import {CustomerService} from "../services/customer.service";
+import {Customer} from '../model/customer';
+import {Event} from '../model/event';
+import {Appointment, CustomerChoices, Order} from '../model/order';
+import {Arrays} from '../model/arrays';
+import {EventService} from '../services/event.service';
+import {AppointmentService} from '../services/appointment.service';
+import {CustomerService} from '../services/customer.service';
 
-import {Options} from "fullcalendar";
-import {Observable} from "rxjs/Observable";
-import {forkJoin} from "rxjs/observable/forkJoin";
-import {of} from "rxjs/observable/of";
-import {DatePipe} from "@angular/common";
+import {Options} from 'fullcalendar';
+import {Observable} from 'rxjs/Observable';
+import {forkJoin} from 'rxjs/observable/forkJoin';
+import {of} from 'rxjs/observable/of';
+import {DatePipe} from '@angular/common';
 import DateTimeFormatOptions = Intl.DateTimeFormatOptions;
 
 
@@ -30,96 +30,8 @@ export class OrderComponent implements OnInit {
   @Output() created = new EventEmitter();
   @Output() aborted = new EventEmitter();
   currentCustomer: Customer;
-  contact: number = 0;
+  contact = 0;
   choices: CustomerChoices[] = [];
-
-  constructor(private eventService: EventService,
-              private appointmentService: AppointmentService,
-              private customerService: CustomerService) {}
-
-  passOrder() {
-    let order = this.toOrder(this.choices, this.contact);
-    this.appointmentService.createOrder(order).subscribe(data => {
-      this.created.emit(data);
-    }, failure => {
-    })
-  }
-
-  abortOrder() {
-    this.aborted.emit('');
-  }
-
-  onCustomerSelected(customer: Customer): void {
-    this.switchCustomer(customer);
-  }
-
-  onCustomerAdded(customer: Customer): void {
-    // if it isn't in the list already
-    if (this.choices.reduce((contains, ca) => contains && ca.customer.id !== customer.id, true)) {
-      this.choices = Arrays.append(this.choices, new CustomerChoices(customer, []));
-      if (this.contact == 0) {
-        this.contact = customer.id;
-      }
-    }
-    this.switchCustomer(customer);
-  }
-
-  addOrRemoveEvent(model: any): void {
-    if (this.currentCustomer == null) {
-      return;
-    }
-
-    const oldChoices: CustomerChoices = this.choices.filter(ca => ca.customer.id === this.currentCustomer.id)[0];
-    let hadChosenEvent = oldChoices.hasChosenEvent(model.event);
-    let newChoices = null;
-    if (hadChosenEvent) {
-      newChoices = oldChoices.unselectEvent(model.event);
-    } else if (model.event.capacity > 0) {
-      newChoices = oldChoices.selectEvent(model.event);
-    } else {
-      return;
-    }
-    this.choices = Arrays.updateElement(this.choices, oldChoices, newChoices);
-    if (hadChosenEvent) {
-      model.event.capacity = model.event.capacity + 1;
-      model.event.backgroundColor = '';
-      // Remove the bg color if no more customer has chosen the slot
-      let isInOrder = this.choices.some(cc => cc.hasChosenEvent(model.event));
-      if (!isInOrder) {
-        model.event.borderColor = '';
-      }
-    } else {
-      model.event.borderColor = 'red';
-      model.event.backgroundColor = '#20c997';
-      model.event.capacity = model.event.capacity - 1;
-    }
-    model.event.title = model.event.capacity + ' restant(s)';
-    this.ucCalendar.updateEvent(model.event);
-  }
-
-  ngOnInit() {
-    let appointments = this.order != null ? this.order.appointments : [];
-    let distinctSlots = new Set<number>(appointments.map(a => a.slotId));
-    let orderObservable: Observable<Customer[]> = this.getCustomersForAppointments(appointments);
-    let eventsObservable: Observable<Event[]> = this.eventService.getEvents(); // TODO - restrict to this week and after
-
-    forkJoin(orderObservable, eventsObservable)
-      .subscribe(data => {
-        this.choices = data[0].map( customer => new CustomerChoices(
-          customer,
-          this.order.appointments
-            .filter(a => a.customerId === customer.id)
-            .map(a => {
-              return {
-                eventId: a.slotId,
-                start: new Date(a.start) // TODO - use event's start date instead
-              }
-            })
-        ));
-        let coloredEvents = OrderComponent.buildEvents(distinctSlots, data[1]);
-        this.calendarOptions = OrderComponent.makeCalendarOptions(coloredEvents);
-      });
-  }
 
   private static makeCalendarOptions(data: any[]): any {
     return {
@@ -152,12 +64,104 @@ export class OrderComponent implements OnInit {
         title: e.capacity + ' restant(s)',
         backgroundColor: OrderComponent.backgroundColor(e.capacity),
         borderColor: selectedSlots.has(e.id) ? 'red' : ''
-      })
+      });
     });
   }
 
+  private static backgroundColor(capacity: number): string {
+    return capacity > 0 ? '' : 'grey';
+  }
+
+  constructor(private eventService: EventService,
+              private appointmentService: AppointmentService,
+              private customerService: CustomerService) {}
+
+  passOrder() {
+    const order = this.toOrder(this.choices, this.contact);
+    this.appointmentService.createOrder(order).subscribe(data => {
+      this.created.emit(data);
+    }, failure => {
+    });
+  }
+
+  abortOrder() {
+    this.aborted.emit('');
+  }
+
+  onCustomerSelected(customer: Customer): void {
+    this.switchCustomer(customer);
+  }
+
+  onCustomerAdded(customer: Customer): void {
+    // if it isn't in the list already
+    if (this.choices.reduce((contains, ca) => contains && ca.customer.id !== customer.id, true)) {
+      this.choices = Arrays.append(this.choices, new CustomerChoices(customer, []));
+      if (this.contact === 0) {
+        this.contact = customer.id;
+      }
+    }
+    this.switchCustomer(customer);
+  }
+
+  addOrRemoveEvent(model: any): void {
+    if (this.currentCustomer == null) {
+      return;
+    }
+
+    const oldChoices: CustomerChoices = this.choices.filter(ca => ca.customer.id === this.currentCustomer.id)[0];
+    const hadChosenEvent = oldChoices.hasChosenEvent(model.event);
+    let newChoices = null;
+    if (hadChosenEvent) {
+      newChoices = oldChoices.unselectEvent(model.event);
+    } else if (model.event.capacity > 0) {
+      newChoices = oldChoices.selectEvent(model.event);
+    } else {
+      return;
+    }
+    this.choices = Arrays.updateElement(this.choices, oldChoices, newChoices);
+    if (hadChosenEvent) {
+      model.event.capacity = model.event.capacity + 1;
+      model.event.backgroundColor = '';
+      // Remove the bg color if no more customer has chosen the slot
+      const isInOrder = this.choices.some(cc => cc.hasChosenEvent(model.event));
+      if (!isInOrder) {
+        model.event.borderColor = '';
+      }
+    } else {
+      model.event.borderColor = 'red';
+      model.event.backgroundColor = '#20c997';
+      model.event.capacity = model.event.capacity - 1;
+    }
+    model.event.title = model.event.capacity + ' restant(s)';
+    this.ucCalendar.updateEvent(model.event);
+  }
+
+  ngOnInit() {
+    const appointments = this.order != null ? this.order.appointments : [];
+    const distinctSlots = new Set<number>(appointments.map(a => a.slotId));
+    const orderObservable: Observable<Customer[]> = this.getCustomersForAppointments(appointments);
+    const eventsObservable: Observable<Event[]> = this.eventService.getEvents(); // TODO - restrict to this week and after
+
+    forkJoin(orderObservable, eventsObservable)
+      .subscribe(data => {
+        this.choices = data[0].map( customer => new CustomerChoices(
+          customer,
+          this.order.appointments
+            .filter(a => a.customerId === customer.id)
+            .map(a => {
+              return {
+                eventId: a.slotId,
+                start: new Date(a.start) // TODO - use event's start date instead
+              };
+            })
+        ));
+        const coloredEvents = OrderComponent.buildEvents(distinctSlots, data[1]);
+        this.calendarOptions = OrderComponent.makeCalendarOptions(coloredEvents);
+      });
+  }
+
   private getCustomersForAppointments(appointments: Appointment[]): Observable<Customer[]> {
-    let customerQueries: Observable<Customer>[] = [];
+    const customerQueries: Observable<Customer>[] = [];
     // This will query each unique (thanks to the Set) customer in the order
     new Set(appointments.map(choice => choice.customerId))
       .forEach(id => customerQueries.push(this.customerService.getCustomer(id)));
@@ -165,14 +169,14 @@ export class OrderComponent implements OnInit {
   }
 
   private toOrder(choices: CustomerChoices[], contact: number): Order {
-    let order = this.order;
-    let reducer = function (appointments: Appointment[], cc: CustomerChoices): Appointment[] {
-      let mapped: Appointment[] = cc.choices.map(choice => {
+    const order = this.order;
+    const reducer = function (appointments: Appointment[], cc: CustomerChoices): Appointment[] {
+      const mapped: Appointment[] = cc.choices.map(choice => {
         return {
           customerId: cc.customer.id,
           slotId: choice.eventId,
           orderId: order == null ? null : order.id
-        }
+        };
       });
       appointments.push(...mapped);
       return appointments;
@@ -182,11 +186,7 @@ export class OrderComponent implements OnInit {
       title: new DatePipe('fr').transform(new Date(), 'full'),
       contactId: contact,
       appointments: choices.reduce(reducer, [])
-    }
-  }
-
-  private static backgroundColor(capacity: number): string {
-    return capacity > 0 ? '' : 'grey';
+    };
   }
 
   private switchCustomer(next: Customer) {
@@ -196,7 +196,7 @@ export class OrderComponent implements OnInit {
         .filter(ca => ca.customer.id === this.currentCustomer.id)
         .reduce((reduced, ca) => [...reduced, ...ca.choices], []) // flatten the appointments
         .forEach(a => {
-          let event = this.ucCalendar.fullCalendar('clientEvents', a.eventId)[0];
+          const event = this.ucCalendar.fullCalendar('clientEvents', a.eventId)[0];
           event.backgroundColor = OrderComponent.backgroundColor(event.capacity);
           this.ucCalendar.updateEvent(event);
         });
@@ -206,7 +206,7 @@ export class OrderComponent implements OnInit {
       .filter(ca => ca.customer.id === next.id)
       .reduce((reduced, ca) => [...reduced, ...ca.choices], []) // flatten the appointments
       .forEach(a => {
-        let event = this.ucCalendar.clientEvents(a.eventId)[0];
+        const event = this.ucCalendar.clientEvents(a.eventId)[0];
         event.backgroundColor = '#20c997';
         this.ucCalendar.updateEvent(event);
       });

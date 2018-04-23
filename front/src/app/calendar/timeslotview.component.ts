@@ -1,11 +1,11 @@
-import {Component, OnInit, ViewChild} from "@angular/core";
-import {DatePipe} from "@angular/common";
+import {Component, OnInit, ViewChild} from '@angular/core';
+import {DatePipe} from '@angular/common';
 
-import {FullCalendarComponent} from "./fullcalendar.component";
-import {MessagesComponent} from "../messages/messages.component";
+import {FullCalendarComponent} from './fullcalendar.component';
+import {MessagesComponent} from '../messages/messages.component';
 
-import {Options} from "fullcalendar";
-import {EventService} from "../services/event.service";
+import {Options} from 'fullcalendar';
+import {EventService} from '../services/event.service';
 
 @Component({
   selector: 'osc-timeslots',
@@ -31,16 +31,19 @@ export class TimeSlotViewComponent implements OnInit {
       ucCalendar.fullCalendar('refetchEvents');
     }, error => {
       this.messageList.error('Echec de la mise à jour du créneau: ' + error);
-    })
+    });
   }
 
   onEventDefined(model: any) {
     const ucCalendar = this.ucCalendar;
     ucCalendar.fullCalendar('unselect');
-    let datePipe = new DatePipe('fr');
+    const datePipe = new DatePipe('fr');
     this.eventService.createEvents([Object.assign({}, model.event, {capacity: 8})])
       .subscribe(events => {
-        this.messageList.info('Un créneau a été créé le ' + datePipe.transform(events[0].start, 'dd/MM/yyyy') + ' de ' + datePipe.transform(events[0].start, 'hh:mm') + ' à ' + datePipe.transform(events[0].end, 'hh:mm'));
+        const createDate = datePipe.transform(events[0].start, 'dd/MM/yyyy');
+        const startTime = datePipe.transform(events[0].start, 'hh:mm');
+        const endTime = datePipe.transform(events[0].end, 'hh:mm');
+        this.messageList.info('Un créneau a été créé le ' + createDate + ' de ' + startTime + ' à ' + endTime);
         ucCalendar.fullCalendar('refetchEvents'); // this is a bit violent, we could just update whatever events have been collected
       });
   }
@@ -78,7 +81,7 @@ export class TimeSlotViewComponent implements OnInit {
               borderColor: '',
               backgroundColor: '',
               title: e.used + ' client' + (e.used !== 1 ? 's' : '')
-          })
+          });
           });
           callback(data);
         });

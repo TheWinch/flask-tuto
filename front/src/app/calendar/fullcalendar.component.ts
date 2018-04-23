@@ -1,4 +1,5 @@
-import { Component, Input, Output, OnInit, AfterViewInit, AfterContentChecked, AfterViewChecked, ElementRef, EventEmitter } from '@angular/core';
+import { Component, Input, Output, OnInit, AfterViewInit, AfterContentChecked,
+  AfterViewChecked, ElementRef, EventEmitter } from '@angular/core';
 import $ from 'jquery';
 import 'fullcalendar';
 import { Options } from 'fullcalendar';
@@ -40,14 +41,14 @@ export class FullCalendarComponent implements OnInit, AfterViewInit, AfterConten
       $('osc-fullcalendar').fullCalendar(this.options);
 
       // Click listeners
-      let elem = document.getElementsByTagName('osc-fullcalendar');
+      const elem = document.getElementsByTagName('osc-fullcalendar');
 
       $('[class ^="fc"][class *="button"]').click(el => {
-        let classnames = el.currentTarget.className.split(' ');
+        const classnames = el.currentTarget.className.split(' ');
         classnames.forEach(name => {
-          if (name.indexOf('button') == name.length - 6) {
+          if (name.indexOf('button') === name.length - 6) {
             name = name.replace(/fc|button|-/g, '');
-            if (name != '') {
+            if (name !== '') {
               eventDispatch(name);
             }
           }
@@ -55,12 +56,12 @@ export class FullCalendarComponent implements OnInit, AfterViewInit, AfterConten
       });
 
       function eventDispatch(buttonType: string) {
-        let data = $('osc-fullcalendar').fullCalendar('getDate');
-        let currentDetail: ButtonClickModel = {
+        const data = $('osc-fullcalendar').fullCalendar('getDate');
+        const currentDetail: ButtonClickModel = {
           buttonType: buttonType,
           data: data
         };
-        var widgetEvent = new CustomEvent('clickButton', {
+        const widgetEvent = new CustomEvent('clickButton', {
           bubbles: true,
           detail: currentDetail
         });
@@ -73,58 +74,58 @@ export class FullCalendarComponent implements OnInit, AfterViewInit, AfterConten
   ngAfterViewChecked() {
   }
   updaterOptions() {
-    let elem = document.getElementsByTagName('osc-fullcalendar');
+    const elem = document.getElementsByTagName('osc-fullcalendar');
     this.options.eventDrop = function (event, duration) {
-      let detail: UpdateEventModel = { event: event, duration: duration };
-      var widgetEvent = new CustomEvent('eventDrop', {
+      const detail: UpdateEventModel = { event: event, duration: duration };
+      const widgetEvent = new CustomEvent('eventDrop', {
         bubbles: true,
         detail: detail
       });
       elem[0].dispatchEvent(widgetEvent);
     };
     this.options.eventResize = function (event, duration) {
-      let detail: UpdateEventModel = { event: event, duration: duration };
-      var widgetEvent = new CustomEvent('eventResize', {
+      const detail: UpdateEventModel = { event: event, duration: duration };
+      const widgetEvent = new CustomEvent('eventResize', {
         bubbles: true,
         detail: detail
       });
       elem[0].dispatchEvent(widgetEvent);
     };
     this.options.eventClick = function (event) {
-      let detail: UpdateEventModel = { event: event, duration: null };
-      var widgetEvent = new CustomEvent('eventClick', {
+      const detail: UpdateEventModel = { event: event, duration: null };
+      const widgetEvent = new CustomEvent('eventClick', {
         bubbles: true,
         detail: detail
       });
       elem[0].dispatchEvent(widgetEvent);
     };
     this.options.windowResize = function (view) {
-      let detail = { view: view };
-      var widgetEvent = new CustomEvent('windowResize', {
+      const detail = { view: view };
+      const widgetEvent = new CustomEvent('windowResize', {
         bubbles: true,
         detail: detail
       });
       elem[0].dispatchEvent(widgetEvent);
     };
     this.options.viewRender = function (view, element) {
-      let detail = { view: view, element: element };
-      var widgetEvent = new CustomEvent('viewRender', {
+      const detail = { view: view, element: element };
+      const widgetEvent = new CustomEvent('viewRender', {
         bubbles: true,
         detail: detail
       });
       elem[0].dispatchEvent(widgetEvent);
     };
     this.options.viewDestroy = function (view, element) {
-      let detail = { view: view, element: element };
-      var widgetEvent = new CustomEvent('viewDestroy', {
+      const detail = { view: view, element: element };
+      const widgetEvent = new CustomEvent('viewDestroy', {
         bubbles: true,
         detail: detail
       });
       elem[0].dispatchEvent(widgetEvent);
     };
     this.options.select = function(start, end) {
-      let detail = { event:{start: start, end:end}, duration: null };
-      let widgetEvent = new CustomEvent('eventSelect', {
+      const detail = { event: {start: start, end: end}, duration: null };
+      const widgetEvent = new CustomEvent('eventSelect', {
         bubbles: true,
         detail: detail
       });

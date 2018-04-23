@@ -1,15 +1,15 @@
-import {Injectable} from "@angular/core";
+import {Injectable} from '@angular/core';
 
-import {Observable} from "rxjs/Observable";
-import {of} from "rxjs/observable/of";
+import {Observable} from 'rxjs/Observable';
+import {of} from 'rxjs/observable/of';
 
-import {EventService} from "./event.service";
-import {Event} from "../model/event";
+import {EventService} from './event.service';
+import {Event} from '../model/event';
 
 @Injectable()
 export class EventServiceMock implements EventService {
   private repo: Event[] = this.createRepo();
-  private counter: number = 17;
+  private counter = 17;
 
   constructor() {
   }
@@ -20,22 +20,22 @@ export class EventServiceMock implements EventService {
 
   public getEventsByDate(start: Date, end: Date): Observable<Event[]> {
     return of(this.repo.filter(event => {
-      let d = event.start instanceof Date ? event.start : new Date(event.start);
+      const d = event.start instanceof Date ? event.start : new Date(event.start);
       return d >= start && d < end;
     }));
   }
 
   public updateEvent(id, start: Date, end: Date): Observable<Event> {
-    let e: Event = this.repo.filter(e => e.id === id)[0];
-    e.start = start;
-    e.end = end;
-    return Observable.of(e);
+    const event: Event = this.repo.filter(e => e.id === id)[0];
+    event.start = start;
+    event.end = end;
+    return Observable.of(event);
   }
 
   public createEvents(model: Event[]): Observable<Event[]> {
     const generated: Event[] = [];
-    for (let e of model) {
-      let item = {
+    for (const e of model) {
+      const item = {
         id: this.counter++,
         start: e.start,
         end: e.end,
