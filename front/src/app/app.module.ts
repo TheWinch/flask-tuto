@@ -38,6 +38,10 @@ registerLocaleData(localeFr, 'fr');
         component: OrderListComponent
       },
       {
+        path: 'orders/:id',
+        component: OrderComponent
+      },
+      {
         path: 'customers',
         component: CustomersComponent
       },

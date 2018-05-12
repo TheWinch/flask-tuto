@@ -10,6 +10,7 @@ import { Subject } from 'rxjs/Subject';
 import {
   debounceTime, distinctUntilChanged, switchMap
 } from 'rxjs/operators';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'osc-order-list',
@@ -19,13 +20,21 @@ import {
 export class OrderListComponent implements OnInit {
   private searchTerms = new Subject<string>();
   orders$: Observable<Order[]>;
-  selectedOrder: Order = null;
   page = 1;
   @ViewChild(MessagesComponent) messageList: MessagesComponent;
 
-  constructor(private appointmentService: AppointmentService) { }
+  constructor(private appointmentService: AppointmentService,
+              private router: Router,
+              private route: ActivatedRoute) { }
 
   ngOnInit() {
+    this.route.queryParams.subscribe(
+      params => {
+        if (params['title'] != null) {
+          this.messageList.info('La commande ' + params['title'] + ' a été créée.');
+        }
+      }
+    );
     this.orders$ = concat(
       this.appointmentService.getOrders(),
       this.searchTerms.pipe(
@@ -41,14 +50,11 @@ export class OrderListComponent implements OnInit {
   }
 
   createOrder(): void {
-    this.selectedOrder = {
-      title: new DatePipe('fr').transform(new Date(), 'full'),
-      appointments: []
-    };
+    this.router.navigate(['orders', 'new']);
   }
 
   editOrder(order: Order): void {
-    this.selectedOrder = order;
+    this.router.navigate(['orders', order.id]);
   }
 
   search(term: string): void {
@@ -57,14 +63,6 @@ export class OrderListComponent implements OnInit {
 
   customerNames(appointments: Appointment[]): any {
     return Array.from(new Set(appointments.map(a => '' + a.customerId)));
-  }
-
-  onOrderCreated(order: Order): void {
-    this.messageList.info('La commande ' + order.title + ' a été créée.');
-    this.selectedOrder = null;
-  }
-  onOrderAborted(): void {
-    this.selectedOrder = null;
   }
 
 }

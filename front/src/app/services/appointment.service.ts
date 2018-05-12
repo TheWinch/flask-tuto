@@ -7,6 +7,8 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {catchError} from 'rxjs/operators';
 
 export abstract class AppointmentService {
+  abstract getOrder(id): Observable<Order>;
+
   abstract getOrders(): Observable<Order[]>;
 
   abstract searchOrders(customerId: number): Observable<Order[]>;
@@ -23,6 +25,10 @@ export class HttpAppointmentService implements AppointmentService {
   private url = '/api/orders/';
 
   constructor(private http: HttpClient) {}
+
+  getOrder(id): Observable<Order> {
+    return this.http.get<Order>(this.url + id);
+  }
 
   getOrders(): Observable<Order[]> {
     return this.http.get<Order[]>(this.url).pipe(

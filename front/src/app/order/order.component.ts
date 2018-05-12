@@ -1,4 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
 import {FullCalendarComponent} from '../calendar/fullcalendar.component';
 
 import {Customer} from '../model/customer';
@@ -12,6 +13,7 @@ import {CustomerService} from '../services/customer.service';
 import {Options} from 'fullcalendar';
 import {Observable} from 'rxjs/Observable';
 import {forkJoin} from 'rxjs/observable/forkJoin';
+import {flatMap} from 'rxjs/operators';
 import {of} from 'rxjs/observable/of';
 import {DatePipe} from '@angular/common';
 import DateTimeFormatOptions = Intl.DateTimeFormatOptions;
@@ -26,9 +28,10 @@ export class OrderComponent implements OnInit {
   calendarOptions: Options;
   @ViewChild(FullCalendarComponent) ucCalendar: FullCalendarComponent;
 
-  @Input() order: Order = null;
   @Output() created = new EventEmitter();
   @Output() aborted = new EventEmitter();
+  order: Observable<Order>;
+  orderId: number = null;
   currentCustomer: Customer;
   contact = 0;
   choices: CustomerChoices[] = [];
@@ -72,20 +75,57 @@ export class OrderComponent implements OnInit {
     return capacity > 0 ? '' : 'grey';
   }
 
+  private static toOrder(orderId: number, choices: CustomerChoices[], contact: number): Order {
+    const reducer = function (appointments: Appointment[], cc: CustomerChoices): Appointment[] {
+      const mapped: Appointment[] = cc.choices.map(choice => {
+        return {
+          customerId: cc.customer.id,
+          slotId: choice.eventId,
+          orderId: orderId
+        };
+      });
+      appointments.push(...mapped);
+      return appointments;
+    };
+
+    return {
+      title: new DatePipe('fr').transform(new Date(), 'full'),
+      contactId: contact,
+      appointments: choices.reduce(reducer, [])
+    };
+  }
+
   constructor(private eventService: EventService,
               private appointmentService: AppointmentService,
-              private customerService: CustomerService) {}
+              private customerService: CustomerService,
+              private router: Router,
+              private route: ActivatedRoute) {
+    if (route == null) {
+      this.order = of(null);
+    } else {
+      this.order = this.route.params.pipe(flatMap(params => params['id'] === 'new' ?
+        of(null) :
+        this.appointmentService.getOrder(params['id'])));
+    }
+  }
 
   passOrder() {
-    const order = this.toOrder(this.choices, this.contact);
-    this.appointmentService.createOrder(order).subscribe(data => {
-      this.created.emit(data);
-    }, failure => {
-    });
+    const order = OrderComponent.toOrder(this.orderId, this.choices, this.contact);
+    if (this.orderId != null) {
+      // TODO: update order on the server
+      this.router.navigate(['orders']);
+    } else {
+      this.appointmentService.createOrder(order).subscribe(data => {
+        this.created.emit(data);
+        this.router.navigate(['orders'], { queryParams: { title: order.title}});
+      }, failure => {
+      });
+    }
   }
 
   abortOrder() {
     this.aborted.emit('');
+    this.router.navigate(['orders']);
   }
 
   onCustomerSelected(customer: Customer): void {
@@ -137,27 +177,32 @@ export class OrderComponent implements OnInit {
   }
 
   ngOnInit() {
-    const appointments = this.order != null ? this.order.appointments : [];
-    const distinctSlots = new Set<number>(appointments.map(a => a.slotId));
-    const orderObservable: Observable<Customer[]> = this.getCustomersForAppointments(appointments);
-    const eventsObservable: Observable<Event[]> = this.eventService.getEvents(); // TODO - restrict to this week and after
+    const obs = this.order == null ? of(null) : this.order;
+    obs.subscribe(ord => {
+      this.orderId = ord == null ? null : ord.id;
+      const appointments = ord != null ? ord.appointments : [];
+      const distinctSlots = new Set<number>(appointments.map(a => a.slotId));
+      const customerObservable: Observable<Customer[]> = this.getCustomersForAppointments(appointments);
+      const eventsObservable: Observable<Event[]> = this.eventService.getEvents(); // TODO - restrict to this week and after
 
-    forkJoin(orderObservable, eventsObservable)
-      .subscribe(data => {
-        this.choices = data[0].map( customer => new CustomerChoices(
-          customer,
-          this.order.appointments
-            .filter(a => a.customerId === customer.id)
-            .map(a => {
-              return {
-                eventId: a.slotId,
-                start: new Date(a.start) // TODO - use event's start date instead
-              };
-            })
-        ));
-        const coloredEvents = OrderComponent.buildEvents(distinctSlots, data[1]);
-        this.calendarOptions = OrderComponent.makeCalendarOptions(coloredEvents);
-      });
+      forkJoin(customerObservable, eventsObservable)
+        .subscribe(data => {
+          this.choices = data[0].map( customer => new CustomerChoices(
+            customer,
+            appointments
+              .filter(a => a.customerId === customer.id)
+              .map(a => {
+                return {
+                  eventId: a.slotId,
+                  start: new Date(a.start) // TODO - use event's start date instead
+                };
+              })
+          ));
+          const coloredEvents = OrderComponent.buildEvents(distinctSlots, data[1]);
+          this.calendarOptions = OrderComponent.makeCalendarOptions(coloredEvents);
+        });
+      }
+    );
   }
 
   private getCustomersForAppointments(appointments: Appointment[]): Observable<Customer[]> {
@@ -166,27 +211,6 @@ export class OrderComponent implements OnInit {
     new Set(appointments.map(choice => choice.customerId))
       .forEach(id => customerQueries.push(this.customerService.getCustomer(id)));
     return customerQueries.length > 0 ? forkJoin(...customerQueries) : of([]);
-  }
-
-  private toOrder(choices: CustomerChoices[], contact: number): Order {
-    const order = this.order;
-    const reducer = function (appointments: Appointment[], cc: CustomerChoices): Appointment[] {
-      const mapped: Appointment[] = cc.choices.map(choice => {
-        return {
-          customerId: cc.customer.id,
-          slotId: choice.eventId,
-          orderId: order == null ? null : order.id
-        };
-      });
-      appointments.push(...mapped);
-      return appointments;
-    };
-
-    return {
-      title: new DatePipe('fr').transform(new Date(), 'full'),
-      contactId: contact,
-      appointments: choices.reduce(reducer, [])
-    };
   }
 
   private switchCustomer(next: Customer) {
