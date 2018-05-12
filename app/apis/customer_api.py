@@ -1,11 +1,17 @@
-from flask_restplus import Resource, fields, reqparse, abort
+# encoding: utf-8
+"""
+All operations to manage the customers.
+"""
 from flask import request, url_for
+from flask_restplus import Resource, fields, reqparse, abort
 from sqlalchemy.exc import IntegrityError
 
 from app import models
-from . import api
+from app.apis import api, UrlWithUid
 
 ns = api.namespace('customers', description='Customers operations')
+
+
 
 customer_model = ns.model('Customer', {
     'id': fields.Integer(readOnly=True),
@@ -13,12 +19,16 @@ customer_model = ns.model('Customer', {
     'lastName': fields.String(attribute='lastname'),
     'email': fields.String,
     'phone': fields.String,
-    'uri': fields.Url('api.customer_ep')
+    'uri': UrlWithUid('api.customer_ep')
 })
 
 
 @ns.route('/')
 class CustomerList(Resource):
+    """
+    Operations related to the list of customers.
+    """
+
     @ns.marshal_list_with(customer_model)
     def get(self):
         """Get the list of all customers, possibly filtered by name"""
@@ -35,31 +45,35 @@ class CustomerList(Resource):
     def post(self):
         """Create a new customer"""
         data = request.get_json()
-        c = models.Customer(firstname=data['firstName'], lastname=data['lastName'], email=data['email'],
-                            phone=data['phone'])
+        c = models.Customer(firstname=data['firstName'], lastname=data['lastName'],
+                            email=data['email'], phone=data['phone'])
         try:
             c.create()
         except IntegrityError:
             abort(409)
-        return c, 201, {'Location': url_for('api.customer_ep', _external=False, id=c.id)}
+        return c, 201, {'Location': url_for('api.customer_ep', _external=False, uid=c.id)}
 
 
-@ns.route('/<int:id>', endpoint='customer_ep')
+@ns.route('/<int:uid>', endpoint='customer_ep')
+@ns.param('uid', 'The customer identifier')
 @ns.response(404, 'Customer not found')
-@ns.param('id', 'The customer identifier')
 class Customer(Resource):
+    """
+    Manages a single customer resource.
+    """
+
     @ns.marshal_with(customer_model)
-    def get(self, id):
+    def get(self, uid):
         """Get a particular customer"""
-        loaded = models.Customer.load(id)
+        loaded = models.Customer.load(uid)
         if loaded is None:
             return abort(404)
         return loaded
 
     @ns.response(204, 'Customer has been deleted')
-    def delete(self, id):
+    def delete(self, uid):
         """Delete a particular customer"""
-        loaded = models.Customer.load(id)
+        loaded = models.Customer.load(uid)
         if loaded is None:
             return '', 404
         loaded.delete()

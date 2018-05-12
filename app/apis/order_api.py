@@ -1,9 +1,12 @@
-from flask_restplus import Resource, fields
+# encoding: utf-8
+"""
+All operations to manage the orders.
+"""
 from flask import request
-
+from flask_restplus import Resource, fields
 
 from app import models, db
-from . import api
+from app.apis import api, UrlWithUid
 
 ns = api.namespace('orders', description='Orders operations')
 
@@ -27,8 +30,8 @@ class FirstAndLastName(fields.Raw):
 
         try:
             data = self.format(value)
-        except fields.MarshallingError as e:
-            msg = 'Unable to marshal field "{0}" value "{1}": {2}'.format(key, value, str(e))
+        except fields.MarshallingError as event:
+            msg = 'Unable to marshal field "{0}" value "{1}": {2}'.format(key, value, str(event))
             raise fields.MarshallingError(msg)
         return self.mask.apply(data) if self.mask else data
 
@@ -39,7 +42,6 @@ appointment_model = ns.model('Appointment', {
     'customerId': fields.Integer(attribute='customer_id'),
     'slotId': fields.Integer(attribute='timeslot_id'),
     'orderId': fields.Integer(attribute='order_id'),
-    'uri': fields.Url('api.appointment_ep')
 })
 
 order_model = ns.model('Order', {
@@ -48,12 +50,15 @@ order_model = ns.model('Order', {
     'contactId': fields.Integer(attribute='payer_id'),
     'title': fields.String,
     'appointments': fields.List(fields.Nested(appointment_model)),
-    'uri': fields.Url('api.order_ep')
+    'uri': UrlWithUid('api.order_ep')
 })
 
 
 @ns.route('/')
 class OrderList(Resource):
+    """
+    Operations related to the list of orders.
+    """
     @ns.marshal_list_with(order_model)
     def get(self):
         """Get the list of all orders"""
@@ -64,36 +69,39 @@ class OrderList(Resource):
     def post(self):
         """Create a new order"""
         data = request.json
-        o = models.Order(title=data['title'], payer_id=data['contactId'])
-        db.session.add(o)
-        for a in data['appointments']:
-            app = models.Appointment(customer_id=a['customerId'], order_id=o.id, timeslot_id=a['slotId'])
-            app.order = o
+        order = models.Order(title=data['title'], payer_id=data['contactId'])
+        db.session.add(order)
+        for appointment in data['appointments']:
+            app = models.Appointment(customer_id=appointment['customerId'], order_id=order.id,
+                                     timeslot_id=appointment['slotId'])
+            app.order = order
             db.session.add(app)
         db.session.commit()
-        db.session.refresh(o, ['id'])
-        return o, 201
+        db.session.refresh(order, ['id'])
+        return order, 201
 
 
-@ns.route('/<int:id>', endpoint='order_ep')
+@ns.route('/<int:uid>', endpoint='order_ep')
 @ns.response(404, 'Order not found')
-@ns.param('id', 'The order identifier')
+@ns.param('uid', 'The order identifier')
 class Order(Resource):
+    """
+    Operations related to managing a single order.
+    """
     @ns.marshal_with(order_model)
-    def get(self, id):
+    def get(self, uid):
         """Get a particular order"""
-        return models.Order.load(id)
+        return models.Order.load(uid)
 
-    def delete(self, id):
+    def delete(self, uid):
         """Delete a particular order"""
-        models.Order.load(id).delete()
+        models.Order.load(uid).delete()
         return '', 204
 
-    def put(self, id):
+    def put(self, uid):
         """Replaces the order with a new definition"""
 
         # TODO:
         # go through all existing appointments and find those deleted, delete them
         # go through all new appointments and find those without id, create them
         return 'Not implemented', 400
-

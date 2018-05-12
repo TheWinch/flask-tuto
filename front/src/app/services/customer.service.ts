@@ -46,6 +46,7 @@ export class HttpCustomerService implements CustomerService {
   searchCustomers(term: string): Observable<Customer[]> {
     if (!term.trim()) {
       // if not search term, return empty customer array.
+      console.error('I have seen an empty search term')
       return of([]);
     }
     return this.http.get<Customer[]>(`${this.url}?name=${term}`).pipe(

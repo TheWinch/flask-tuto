@@ -1,11 +1,12 @@
 #!flask/bin/python
 import datetime
+import os
 
 from app import db, models
 from app.factory import create_app
 from flask_migrate import Migrate
 
-app = create_app()
+app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 migrate = Migrate(app, db)
 
 
@@ -42,6 +43,13 @@ def populate_samples():
     a2 = models.Appointment(customer=vgr, order=o1, timeslot=ts2)
     a1.create()
     a2.create()
+
+
+@app.cli.command()
+def routes():
+    import pprint
+    pprint.pprint(list(map(lambda x: repr(x), app.url_map.iter_rules())))
+
 
 if __name__ == "__main__":
     app.run(debug=True)

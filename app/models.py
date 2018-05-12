@@ -1,6 +1,11 @@
-from app import db
-from sqlalchemy import or_, and_
+# encoding: utf-8
+"""
+All DB models for the application.
+"""
 from dateutil.parser import parse
+from sqlalchemy import or_, and_
+
+from app import db
 
 
 class Customer(db.Model):
@@ -26,9 +31,10 @@ class Customer(db.Model):
         return Customer.query.get(cid)
 
     @staticmethod
-    def load_by_name(p):
-        return Customer.query.filter(or_(Customer.firstname.like('%' + p + '%'), Customer.lastname.like('%' + p + '%'),
-                                         Customer.email.like('%' + p + '%'))).all()
+    def load_by_name(pattern):
+        return Customer.query.filter(or_(Customer.firstname.like('%' + pattern + '%'),
+                                         Customer.lastname.like('%' + pattern + '%'),
+                                         Customer.email.like('%' + pattern + '%'))).all()
 
     def create(self):
         db.session.add(self)
@@ -112,14 +118,15 @@ class TimeSlot(db.Model):
     __tablename__ = 'timeslot'
     id = db.Column(db.Integer, primary_key=True)
     start = db.Column(db.DateTime, index=True, unique=True)
-    duration = db.Column(db.Integer)       # in ms
+    duration = db.Column(db.Integer)  # in ms
     trainers = db.Column(db.String(128))
     capacity = db.Column(db.Integer)
     free_capacity = db.Column(db.Integer)  # denormalized remaining capacity
     appointments = db.relationship('Appointment', backref='timeslot', lazy=True)
 
     def __repr__(self):
-        return '<Slot %d, date=%r, capacity=%d>' % (self.id, self.start.isoformat('T'), self.capacity)
+        return '<Slot %d, date=%r, capacity=%d>' % (
+            self.id, self.start.isoformat('T'), self.capacity)
 
     @staticmethod
     def load_all():
@@ -132,9 +139,12 @@ class TimeSlot(db.Model):
     @staticmethod
     def load_by_date(start, end=None):
         if end is not None:
-            return TimeSlot.query.filter(and_(TimeSlot.start >= parse(start), TimeSlot.start <= parse(end))).order_by(TimeSlot.start).all()
+            return TimeSlot.query.filter(
+                and_(TimeSlot.start >= parse(start), TimeSlot.start <= parse(end))).order_by(
+                TimeSlot.start).all()
         else:
-            return TimeSlot.query.filter(TimeSlot.start >= parse(start)).order_by(TimeSlot.start).all()
+            return TimeSlot.query.filter(TimeSlot.start >= parse(start)).order_by(
+                TimeSlot.start).all()
 
     def create(self):
         db.session.add(self)

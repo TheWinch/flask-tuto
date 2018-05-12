@@ -19,19 +19,10 @@ def create_app(cfg=None):
     app.config.from_object(config[config_name])
     db.init_app(app)
 
-    register_blueprints(app)
+    from app.apis import init_app as init_api
+    from app.default import init_app as init_default
+
+    init_api(app)
+    init_default(app)
 
     return app
-
-
-def register_blueprints(app):
-    from .default import default as default_blueprint
-    app.register_blueprint(default_blueprint)
-    from .apis import api_blueprint
-    app.register_blueprint(api_blueprint)
-    return None
-
-
-if __name__ == "__main__":
-    app = create_app()
-    app.run(debug=True)
