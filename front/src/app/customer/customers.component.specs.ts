@@ -1,12 +1,14 @@
 import { TestBed, async } from '@angular/core/testing';
 
 import { CustomersComponent } from './customers.component';
+import { MessagesComponent } from '../messages/messages.component';
 
 describe('CustomersComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
-        CustomersComponent
+        CustomersComponent,
+        MessagesComponent
       ],
     }).compileComponents();
   }));

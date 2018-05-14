@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CustomerDetailComponent } from './customer-detail.component';
+import { Customer } from '../model/customer';
 
 describe('CustomerDetailComponent', () => {
   let component: CustomerDetailComponent;
@@ -8,14 +9,21 @@ describe('CustomerDetailComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ CustomerDetailComponent ]
+      declarations: [CustomerDetailComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CustomerDetailComponent);
     component = fixture.componentInstance;
+    component.customer = {
+      id: 1,
+      firstName: 'Vincent',
+      lastName: 'Girard-Reydet',
+      email: 'toto@toto.com',
+      phone: '12345'
+    };
     fixture.detectChanges();
   });
 

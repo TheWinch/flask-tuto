@@ -17,6 +17,7 @@ import {flatMap} from 'rxjs/operators';
 import {of} from 'rxjs/observable/of';
 import {DatePipe} from '@angular/common';
 import DateTimeFormatOptions = Intl.DateTimeFormatOptions;
+import { equalParamsAndUrlSegments } from '@angular/router/src/router_state';
 
 
 @Component({
@@ -99,15 +100,7 @@ export class OrderComponent implements OnInit {
               private appointmentService: AppointmentService,
               private customerService: CustomerService,
               private router: Router,
-              private route: ActivatedRoute) {
-    if (route == null) {
-      this.order = of(null);
-    } else {
-      this.order = this.route.params.pipe(flatMap(params => params['id'] === 'new' ?
-        of(null) :
-        this.appointmentService.getOrder(params['id'])));
-    }
-  }
+              private route: ActivatedRoute) {  }
 
   passOrder() {
     const order = OrderComponent.toOrder(this.orderId, this.choices, this.contact);
@@ -177,8 +170,9 @@ export class OrderComponent implements OnInit {
   }
 
   ngOnInit() {
-    const obs = this.order == null ? of(null) : this.order;
-    obs.subscribe(ord => {
+    this.route.paramMap.pipe(flatMap(params => params.get('id') === 'new' ? of(null) :
+                           this.appointmentService.getOrder(params.get('id')))
+      ).subscribe(ord => {
       this.orderId = ord == null ? null : ord.id;
       const appointments = ord != null ? ord.appointments : [];
       const distinctSlots = new Set<number>(appointments.map(a => a.slotId));
