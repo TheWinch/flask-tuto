@@ -1,7 +1,7 @@
 import {Component, Input, EventEmitter, Output, ChangeDetectionStrategy} from '@angular/core';
 
 import { Customer } from '../model/customer';
-import { CustomerChoices } from '../model/order';
+import { CustomerSelection } from '../model/customer-choices';
 
 @Component({
   selector: 'osc-customer-list',
@@ -13,7 +13,7 @@ export class OrderCustomerListComponent {
   @Input()
   currentSelection: Customer;
   @Input()
-  customerChoices: CustomerChoices[] = [];
+  customerChoices: CustomerSelection[] = [];
   @Output() selected: EventEmitter<Customer> = new EventEmitter<Customer>();
 
   constructor() { }

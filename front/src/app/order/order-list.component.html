@@ -37,8 +37,3 @@
   </div><div class="w-100" ></div>
   <ngb-pagination [directionLinks]="false" [collectionSize]="orders$.length | async" [pageSize]="10" [(page)]="page"></ngb-pagination>
 </div>
-<!--<osc-order-details *ngIf="selectedOrder != null"
-                   [order]="selectedOrder"
-                   (created)="onOrderCreated($event)"
-                   (aborted)="onOrderAborted()">
-</osc-order-details>-->
