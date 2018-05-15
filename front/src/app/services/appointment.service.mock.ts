@@ -146,4 +146,8 @@ export class AppointmentServiceMock implements AppointmentService {
     return Observable.of(savedOrder);
   }
 
+  public updateOrder(order: Order): Observable<Order> {
+    return Observable.of(order);
+  }
+
 }

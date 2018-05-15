@@ -14,6 +14,8 @@ export abstract class AppointmentService {
   abstract searchOrders(customerId: number): Observable<Order[]>;
 
   abstract createOrder(order: Order): Observable<Order>;
+
+  abstract updateOrder(order: Order): Observable<Order>;
 }
 
 const httpOptions = {
@@ -46,6 +48,9 @@ export class HttpAppointmentService implements AppointmentService {
     return this.http.post<Order>(this.url, JSON.stringify(order), httpOptions);
   }
 
+  updateOrder(order: Order): Observable<Order> {
+    return this.http.put<Order>(this.url + order.id, JSON.stringify(order), httpOptions);
+  }
 
   private handleError<T>(operation = 'operation', result ?: T) {
     return (error: any): Observable<T> => {

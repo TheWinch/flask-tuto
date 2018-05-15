@@ -19,5 +19,5 @@ def home():
 @default.route('/orders/<path:path>')
 @default.route('/customers/', defaults={'path': ''})
 @default.route('/customers/<path:path>')
-def homeWithPath(path):
+def home_with_path(path):
     return default.send_static_file('index.html')

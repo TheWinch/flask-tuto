@@ -15,6 +15,7 @@ class FirstAndLastName(fields.Raw):
     """
     Extracts the first name and last name from the field given as attribute
     """
+
     def __init__(self, **kwargs):
         super(FirstAndLastName, self).__init__(**kwargs)
 
@@ -59,6 +60,7 @@ class OrderList(Resource):
     """
     Operations related to the list of orders.
     """
+
     @ns.marshal_list_with(order_model)
     def get(self):
         """Get the list of all orders"""
@@ -81,6 +83,17 @@ class OrderList(Resource):
         return order, 201
 
 
+class WrappedAppointment(object):
+    def __init__(self, appointment):
+        self.appointment = appointment
+
+    def __eq__(self, other):
+        return self.appointment.customer_id == other.appointment.customer_id and self.appointment.timeslot_id == other.appointment.timeslot_id
+
+    def __hash__(self):
+        return hash((self.appointment.customer_id, self.appointment.timeslot_id))
+
+
 @ns.route('/<int:uid>', endpoint='order_ep')
 @ns.response(404, 'Order not found')
 @ns.param('uid', 'The order identifier')
@@ -88,6 +101,7 @@ class Order(Resource):
     """
     Operations related to managing a single order.
     """
+
     @ns.marshal_with(order_model)
     def get(self, uid):
         """Get a particular order"""
@@ -98,10 +112,28 @@ class Order(Resource):
         models.Order.load(uid).delete()
         return '', 204
 
+    @ns.marshal_with(order_model, code=200)
+    @ns.header('Content-Type', 'MUST be application/json', required=True)
     def put(self, uid):
         """Replaces the order with a new definition"""
+        order = models.Order.load(uid)
+        data = request.json
+        appointments = set(WrappedAppointment(
+            models.Appointment(customer_id=appointment['customerId'], order_id=order.id,
+                               timeslot_id=appointment['slotId']))
+                           for appointment in data['appointments'])
+        original_appointments = set(WrappedAppointment(a) for a in order.appointments)
 
-        # TODO:
-        # go through all existing appointments and find those deleted, delete them
-        # go through all new appointments and find those without id, create them
-        return 'Not implemented', 400
+        removed = original_appointments - appointments
+        added = appointments - original_appointments
+
+        for a in removed:
+            order.appointments.remove(a.appointment)
+            db.session.delete(a.appointment)
+        for a in added:
+            a.appointment.order = order
+            db.session.add(a.appointment)
+            order.appointments.append(a.appointment)
+        db.session.commit()
+
+        return order

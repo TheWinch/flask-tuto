@@ -97,13 +97,14 @@ export class OrderComponent implements OnInit {
           this.created.emit(data);
           this.router.navigate(['orders'], { queryParams: { title: order.title } });
         }, failure => {
+          console.error('Could not create order: ' + failure);
         });
     } else {
-      // this.appointmentService.updateOrder(order).subscribe(data => {
+      this.appointmentService.updateOrder(order).subscribe(data => {
         this.router.navigate(['orders']);
-      // }, failure => {
-      // });
-      this.router.navigate(['orders']);
+      }, failure => {
+        console.error('Could not update order: ' + failure);
+      });
     }
   }
 
