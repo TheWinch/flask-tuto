@@ -63,6 +63,10 @@ export class OrderModel {
         return this.eventsForCustomer(this._currentCustomer);
     }
 
+    get contactId(): number {
+        return this._contactId;
+    }
+
     buildOrder(): Order {
         const self = this;
         const selectionToAppointments = function (appointments: Appointment[], selection: CustomerSelection): Appointment[] {
@@ -112,6 +116,24 @@ export class OrderModel {
         }
     }
 
+    /**
+     * Remove the selected customer from the order, and returns all his choices.
+     */
+    removeCustomer(customer: Customer): number[] {
+        if (customer == null || !this.containsCustomer(customer)) {
+            return [];
+        }
+        const removedChoices = this._selections.find(sel => sel.customer.id === customer.id).choices;
+        if (this._currentCustomer != null && this._currentCustomer.id === customer.id) {
+            this._currentCustomer = null;
+        }
+        if (this._contactId === customer.id) {
+            this._contactId = this._selections.length === 0 ? null : this._selections[0].customer.id;
+        }
+        this._selections = ImmutableArrays.removeMatching(this._selections, sel => sel.customer.id === customer.id);
+        return removedChoices.map(choice => choice.id);
+    }
+
     containsCustomer(customer: Customer): boolean {
         return this._selections.some(selection => selection.customer.id === customer.id);
     }
@@ -120,6 +142,9 @@ export class OrderModel {
         return this._selections.some(selection => selection.containsEvent(id));
     }
 
+    /**
+     * Returns true if this order is unknown on server side.
+     */
     isNewOrder(): boolean {
         return this._orderId == null;
     }

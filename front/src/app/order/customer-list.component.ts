@@ -15,6 +15,7 @@ export class OrderCustomerListComponent {
   @Input()
   customerChoices: CustomerSelection[] = [];
   @Output() selected: EventEmitter<Customer> = new EventEmitter<Customer>();
+  @Output() removed: EventEmitter<Customer> = new EventEmitter<Customer>();
 
   constructor() { }
 
@@ -25,5 +26,12 @@ export class OrderCustomerListComponent {
   onSelect(customer: Customer): void {
     this.currentSelection = customer;
     this.selected.emit(customer);
+  }
+
+  onRemove(customer: Customer): void {
+    if (this.currentSelection === customer) {
+      this.currentSelection = null;
+    }
+    this.removed.emit(customer);
   }
 }

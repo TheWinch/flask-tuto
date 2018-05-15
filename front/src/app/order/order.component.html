@@ -9,7 +9,8 @@
           <strong>Clients dans la commande</strong>
       </div>
       <div class="panel-body" *ngIf="orderModel != null">
-        <osc-customer-list [currentSelection]="orderModel.currentCustomer" [customerChoices]="orderModel.selections" (selected)="onCustomerSelected($event)"></osc-customer-list>
+        <osc-customer-list [currentSelection]="orderModel.currentCustomer" [customerChoices]="orderModel.selections" 
+                           (selected)="onCustomerSelected($event)" (removed)="onCustomerRemoved($event)"></osc-customer-list>
         <osc-customer-search (selected)="onCustomerAdded($event)"></osc-customer-search>
         <div class="d-flex justify-content-between align-items-center">
           <button class="btn btn-danger mt-3" type="button" (click)="abortOrder()">

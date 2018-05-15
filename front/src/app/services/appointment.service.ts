@@ -9,9 +9,9 @@ import {catchError} from 'rxjs/operators';
 export abstract class AppointmentService {
   abstract getOrder(id): Observable<Order>;
 
-  abstract getOrders(): Observable<Order[]>;
+  abstract getOrders(page?: number): Observable<Order[]>;
 
-  abstract searchOrders(customerId: number): Observable<Order[]>;
+  abstract searchOrders(page?: number, term?: string): Observable<Order[]>;
 
   abstract createOrder(order: Order): Observable<Order>;
 
@@ -32,14 +32,17 @@ export class HttpAppointmentService implements AppointmentService {
     return this.http.get<Order>(this.url + id);
   }
 
-  getOrders(): Observable<Order[]> {
-    return this.http.get<Order[]>(this.url).pipe(
+  getOrders(page?: number): Observable<Order[]> {
+    const url = page ? this.url + '?page=' + page : this.url;
+    return this.http.get<Order[]>(url).pipe(
       catchError(this.handleError('getOrders', []))
     );
   }
 
-  searchOrders(customerId: number): Observable<Order[]> {
-    return this.http.get<Order[]>(`${this.url}?customerId=${customerId}`).pipe(
+  searchOrders(page?: number, term?: string): Observable<Order[]> {
+    let url = page ? this.url + '?page=' + page : this.url;
+    url = term ? url + '&name=' + term : url;
+    return this.http.get<Order[]>(url).pipe(
       catchError(this.handleError<Order[]>('searchOrders', []))
     );
   }

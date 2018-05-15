@@ -94,11 +94,11 @@ export class OrderComponent implements OnInit {
     const order = this.orderModel.buildOrder();
     if (this.orderModel.isNewOrder()) {
       this.appointmentService.createOrder(order).subscribe(data => {
-          this.created.emit(data);
-          this.router.navigate(['orders'], { queryParams: { title: order.title } });
-        }, failure => {
-          console.error('Could not create order: ' + failure);
-        });
+        this.created.emit(data);
+        this.router.navigate(['orders'], { queryParams: { title: order.title } });
+      }, failure => {
+        console.error('Could not create order: ' + failure);
+      });
     } else {
       this.appointmentService.updateOrder(order).subscribe(data => {
         this.router.navigate(['orders']);
@@ -117,25 +117,38 @@ export class OrderComponent implements OnInit {
     this.switchCustomer(customer);
   }
 
+  onCustomerRemoved(customer: Customer): void {
+    const removedEventIds = this.orderModel.removeCustomer(customer);
+    removedEventIds.forEach(id => {
+      const event = this.ucCalendar.fullCalendar('clientEvents', id)[0];
+      OrderComponent.formatEvent(event, this.orderModel.containsEvent(id),
+                                 this.orderModel.currentCustomerEvents.some(c => c.id === event.id));
+      event.capacity = event.capacity + 1;
+      event.title = event.capacity + ' restant(s)';
+      this.ucCalendar.updateEvent(event);
+    });
+  }
+
   onCustomerAdded(customer: Customer): void {
     this.orderModel.addCustomer(customer);
     this.switchCustomer(customer);
   }
 
   onEventSelected(model: any): void {
-    const result = this.orderModel.flipEvent(model.event);
+    const event = model.event;
+    const result = this.orderModel.flipEvent(event);
     if (result === EventFlipResult.NONE) {
       return;
     }
     if (result === EventFlipResult.SELECT) {
-      model.event.capacity = model.event.capacity - 1;
-      OrderComponent.formatEvent(model.event, true, true);
+      event.capacity = event.capacity - 1;
+      OrderComponent.formatEvent(event, true, true);
     } else {
-      model.event.capacity = model.event.capacity + 1;
-      OrderComponent.formatEvent(model.event, this.orderModel.containsEvent(model.event.id), false);
+      event.capacity = event.capacity + 1;
+      OrderComponent.formatEvent(event, this.orderModel.containsEvent(event.id), false);
     }
-    model.event.title = model.event.capacity + ' restant(s)';
-    this.ucCalendar.updateEvent(model.event);
+    event.title = event.capacity + ' restant(s)';
+    this.ucCalendar.updateEvent(event);
   }
 
   ngOnInit() {

@@ -3,7 +3,9 @@
      [class.bd-callout-primary]="choice.customer === currentSelection"
      (click)="onSelect(choice.customer)">
   <h4 class="d-flex justify-content-between align-items-center">{{ choice.customer.firstName }} {{ choice.customer.lastName }}
-    <small>{{ choice.choices.length }} cours</small></h4>
+    <small>{{ choice.choices.length }} cours</small>
+    <a (click)="onRemove(choice.customer)" class="text-danger" style="cursor: pointer"><i class="fa fa-minus-circle"></i></a>
+  </h4>
   <ul class="list-unstyled ml-3">
     <li *ngFor="let c of choice.sorted_choices" class="w-75 d-flex justify-content-between align-items-center">
       {{c.start | date:'EEEE dd/MM/yyyy':'':'fr'}}

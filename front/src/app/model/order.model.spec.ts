@@ -186,4 +186,17 @@ describe('OrderModel', () => {
     expect(this.model.containsCustomer(ALTERNATE_CUSTOMER)).toBeTruthy();
     expect(this.model.currentCustomer).toBeNull();
   });
+
+  it('does not contain a customer events once the customer is removed', () => {
+    this.model = new OrderModel(SAMPLE_ORDER, [REFERENCE_CUSTOMER, ALTERNATE_CUSTOMER]);
+    this.model.setCurrentCustomer(REFERENCE_CUSTOMER);
+
+    const removedChoices = this.model.removeCustomer(REFERENCE_CUSTOMER);
+
+    expect(this.model.containsCustomer(REFERENCE_CUSTOMER)).toBeFalsy();
+    expect(this.model.containsEvent(REFERENCE_EVENTS[2])).toBeFalsy();
+    expect(this.model.containsEvent(REFERENCE_EVENTS[1])).toBeTruthy();
+    expect(this.model.contactId).toBeNull();
+    expect(removedChoices).toEqual([3]);
+  });
 });

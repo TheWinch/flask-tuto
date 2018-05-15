@@ -19,21 +19,27 @@
     <table class="table table-hover mt-3">
       <thead>
       <tr>
-        <th scope="col"></th>
         <th scope="col">Commande</th>
         <th scope="col">Nombre de cours</th>
         <th scope="col">Contact</th>
+        <th scope="col">Action</th>
       </tr>
       </thead>
       <tbody>
       <tr *ngFor="let order of orders$ | async">
-        <td><a (click)="editOrder(order)" class="badge badge-pill badge-primary">Modifier</a></td>
         <td>{{ order.title }}</td>
         <td>{{ order.appointments.length}}</td>
         <td>{{ order.contact }}</td>
+        <td><a (click)="editOrder(order)" class="badge badge-pill badge-primary" style="cursor: pointer; color: white">Editer</a></td>
       </tr>
       </tbody>
     </table>
   </div><div class="w-100" ></div>
-  <ngb-pagination [directionLinks]="false" [collectionSize]="orders$.length | async" [pageSize]="10" [(page)]="page"></ngb-pagination>
+  <ngb-pagination 
+      [directionLinks]="false" 
+      [collectionSize]="collectionSize"
+      [pageSize]="4"
+      [(page)]="page"
+      (pageChange)="onPageChange($event)">
+  </ngb-pagination>
 </div>

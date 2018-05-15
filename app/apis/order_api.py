@@ -126,8 +126,10 @@ class Order(Resource):
 
         removed = original_appointments - appointments
         added = appointments - original_appointments
+        order.payer_id = data['contactId']
+        order.title = data['title']
 
-        for a in removed:
+        for a in removed:   
             order.appointments.remove(a.appointment)
             db.session.delete(a.appointment)
         for a in added:
