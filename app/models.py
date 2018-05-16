@@ -61,8 +61,24 @@ class Order(db.Model):
         return '<Order %d p=%d>' % (self.id, self.payer_id)
 
     @staticmethod
-    def load_all():
-        return Order.query.all()
+    def load_all(page=None, limit=10):
+        allOrders = Order.query.all() # TODO - find how to get the count estimate
+        if page is None:
+            return allOrders, len(allOrders)
+        else:
+            start, stop = (page-1)*limit, page*limit
+            return Order.query.slice(start, stop).all(), len(allOrders)
+
+    @staticmethod
+    def load_all_by_customer(searchTerm, page=None, limit=10):
+        # TODO- find how to express criterion on order's customers
+        query = Order.query.filter(or_(Order.appointments.customer.firstname.like('%' + searchTerm + '%'),
+                                       Order.appointments.customer.lastname.like('%' + searchTerm + '%'),
+                                       Order.appointments.customer.email.like('%' + searchTerm + '%')))
+        if page is None:
+            return query.all()
+        start, stop = (page-1)*limit, page*limit
+        return query.slice(start, stop).all(), 10
 
     @staticmethod
     def load(oid):

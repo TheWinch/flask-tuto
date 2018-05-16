@@ -6,12 +6,17 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {catchError} from 'rxjs/operators';
 
+export class SearchOrdersResult {
+  totalCount: number;
+  orders: Order[];
+}
+
 export abstract class AppointmentService {
   abstract getOrder(id): Observable<Order>;
 
   abstract getOrders(page?: number): Observable<Order[]>;
 
-  abstract searchOrders(page?: number, term?: string): Observable<Order[]>;
+  abstract searchOrders(page?: number, pageSize?: number, term?: string): Observable<SearchOrdersResult>;
 
   abstract createOrder(order: Order): Observable<Order>;
 
@@ -39,11 +44,12 @@ export class HttpAppointmentService implements AppointmentService {
     );
   }
 
-  searchOrders(page?: number, term?: string): Observable<Order[]> {
+  searchOrders(page?: number, pageSize?: number, term?: string): Observable<SearchOrdersResult> {
     let url = page ? this.url + '?page=' + page : this.url;
+    url = pageSize ? url + '&limit=' + pageSize : url;
     url = term ? url + '&name=' + term : url;
-    return this.http.get<Order[]>(url).pipe(
-      catchError(this.handleError<Order[]>('searchOrders', []))
+    return this.http.get<SearchOrdersResult>(url).pipe(
+      catchError(this.handleError<SearchOrdersResult>('searchOrders', {totalCount: 0, orders: []}))
     );
   }
 

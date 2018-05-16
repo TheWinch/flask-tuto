@@ -1,11 +1,11 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {MessagesComponent} from '../messages/messages.component';
-import {AppointmentService} from '../services/appointment.service';
+import {AppointmentService, SearchOrdersResult} from '../services/appointment.service';
 import {Appointment, Order} from '../model/order';
 import {DatePipe} from '@angular/common';
 import { Observable } from 'rxjs/Observable';
 import { concat } from 'rxjs/observable/concat';
-import { tap } from 'rxjs/operators';
+import { tap, map } from 'rxjs/operators';
 import { Subject } from 'rxjs/Subject';
 
 import {
@@ -23,6 +23,7 @@ export class OrderListComponent implements OnInit {
   orders$: Observable<Order[]>;
   collectionSize = 0;
   page = 1;
+  pageSize = 4;
   searchTerm = '';
   @ViewChild(MessagesComponent) messageList: MessagesComponent;
 
@@ -30,25 +31,24 @@ export class OrderListComponent implements OnInit {
               private router: Router,
               private route: ActivatedRoute) { }
 
-  getPage(page: number, searchTerm: string) {
+  private getPage() {
     // Orders will be updated by the initial search AND any of the subsequent searches triggered by the
     // search terms
-    this.orders$ = concat(this.appointmentService.searchOrders(page, searchTerm),
+    this.orders$ = concat(this.appointmentService.searchOrders(this.page, this.pageSize, this.searchTerm),
     this.searchTerms.pipe(
       // wait 300ms after each keystroke before considering the term
       debounceTime(300),
-
       // ignore new term if same as previous term
       distinctUntilChanged(),
-
       // switch to new search observable each time the term changes
       switchMap((term: string) => {
         this.page = 1;
         this.searchTerm = term;
-        return this.appointmentService.searchOrders(this.page, this.searchTerm);
+        return this.appointmentService.searchOrders(this.page, this.pageSize, this.searchTerm);
       }))
     ).pipe(
-      tap((res: any) => this.collectionSize = res.length)
+      tap((res: SearchOrdersResult) => this.collectionSize = res.totalCount),
+      map((res: SearchOrdersResult) => res.orders)
     );
   }
 
@@ -60,7 +60,9 @@ export class OrderListComponent implements OnInit {
         }
       }
     );
-    this.getPage(1, '');
+    this.pageSize = 4;
+    this.page = 1;
+    this.getPage();
   }
 
   createOrder(): void {
@@ -80,7 +82,7 @@ export class OrderListComponent implements OnInit {
   }
 
   onPageChange(newPage: number): void {
-    this.getPage(newPage, this.searchTerm);
+    this.getPage();
   }
 
 }

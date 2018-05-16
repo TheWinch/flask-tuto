@@ -3,7 +3,7 @@ import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 
 import {Appointment, Order} from '../model/order';
-import {AppointmentService} from './appointment.service';
+import {AppointmentService, SearchOrdersResult} from './appointment.service';
 
 
 @Injectable()
@@ -128,12 +128,16 @@ export class AppointmentServiceMock implements AppointmentService {
     return Observable.of(this.orders.find(order => order.id === id));
   }
 
-  public getOrders(): Observable<Order[]> {
+  public getOrders(page?: number): Observable<Order[]> {
     return Observable.of(this.orders);
   }
 
-  public searchOrders(customerId: number): Observable<Order[]> {
-    return Observable.of(this.orders.filter(o => o.appointments.some(a => a.customerId === customerId)));
+  public searchOrders(page?: number, pageSize?: number, term?: string): Observable<SearchOrdersResult> {
+    // TODO - mock filtering
+    return Observable.of({
+      totalCount: this.orders.length,
+      orders: this.orders
+    });
   }
 
   public createOrder(order: Order): Observable<Order> {

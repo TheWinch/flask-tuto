@@ -3,7 +3,7 @@
 All operations to manage the orders.
 """
 from flask import request
-from flask_restplus import Resource, fields
+from flask_restplus import Resource, fields, reqparse
 
 from app import models, db
 from app.apis import api, UrlWithUid
@@ -54,6 +54,25 @@ order_model = ns.model('Order', {
     'uri': UrlWithUid('api.order_ep')
 })
 
+order_list_model = ns.model('OrderList', {
+    'totalCount': fields.Integer(attribute='total_count'),
+    'orders': fields.List(fields.Nested(order_model))
+})
+
+
+def make_get_parser():
+    parser = reqparse.RequestParser()
+    parser.add_argument('name', required=False)
+    parser.add_argument('page', type=int, required=False)
+    parser.add_argument('limit', type=int, required=False)
+    return parser
+
+
+class SearchResult:
+    def __init__(self, total_count, orders):
+        self.total_count = total_count
+        self.orders = orders
+
 
 @ns.route('/')
 class OrderList(Resource):
@@ -61,10 +80,21 @@ class OrderList(Resource):
     Operations related to the list of orders.
     """
 
-    @ns.marshal_list_with(order_model)
+    @ns.marshal_with(order_list_model)
+    @ns.expect(make_get_parser())
     def get(self):
         """Get the list of all orders"""
-        return models.Order.load_all()
+        parser = make_get_parser()
+        args = parser.parse_args()
+        if args['limit'] is None:
+            limit = 4
+        else:
+            limit= args['limit']
+        if args['name'] is not None:
+            orders, total_count = models.Order.load_all_by_customer(args['name'], args['page'], limit)
+        else:
+            orders, total_count = models.Order.load_all(args['page'], args['limit'])
+        return SearchResult(total_count, orders)
 
     @ns.marshal_with(order_model, code=201)
     @ns.header('Content-Type', 'MUST be application/json', required=True)
@@ -129,7 +159,7 @@ class Order(Resource):
         order.payer_id = data['contactId']
         order.title = data['title']
 
-        for a in removed:   
+        for a in removed:
             order.appointments.remove(a.appointment)
             db.session.delete(a.appointment)
         for a in added:
