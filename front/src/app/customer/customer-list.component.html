@@ -38,5 +38,5 @@
       </tbody>
     </table>
   </div><div class="w-100" ></div>
-  <ngb-pagination [directionLinks]="false" [collectionSize]="(customers$|async)?.length | async" [pageSize]="4" [(page)]="page"></ngb-pagination>
+  <ngb-pagination [directionLinks]="false" [collectionSize]="collectionSize" [pageSize]="4" [(page)]="page" (pageChange)="onPageChange($event)"></ngb-pagination>
 </div>

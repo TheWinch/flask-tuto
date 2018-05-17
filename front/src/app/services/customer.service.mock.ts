@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Customer } from '../model/customer';
-import { CustomerService } from './customer.service';
+import { CustomerService, SearchResult } from './customer.service';
 
 import { Observable } from 'rxjs/Observable';
 import { of } from 'rxjs/observable/of';
@@ -30,8 +30,8 @@ export class CustomerServiceMock implements CustomerService {
         email: 'vincent.girardreydet@'
     }];
 
-  getCustomers(): Observable<Customer[]> {
-    return of(this.repo);
+  getCustomers(page?: number, pageSize?: number): Observable<SearchResult> {
+    return of({totalCount: this.repo.length, customers: this.repo});
   }
 
   getCustomer(id: number): Observable<Customer> {
@@ -55,13 +55,17 @@ export class CustomerServiceMock implements CustomerService {
     return of(created);
   }
 
+  updateCustomer(customer: Customer): Observable<Customer> {
+      return of(customer);
+  }
+
   /**
    * Look for customers matching the provided term
    */
-  searchCustomers(term: string): Observable<Customer[]> {
+  searchCustomers(term: string, page?: number, pageSize?: number): Observable<SearchResult> {
     if (!term.trim()) {
         // if not search term, return empty customer array.
-        return of([]);
+        return of({totalCount: 0, customers: []});
       }
     const result = [];
     for (const customer of this.repo) {
@@ -71,6 +75,6 @@ export class CustomerServiceMock implements CustomerService {
                 result.push(customer);
             }
     }
-    return of(result);
+    return of({totalCount: result.length, customers: result});
   }
 }

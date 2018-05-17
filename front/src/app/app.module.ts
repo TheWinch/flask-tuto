@@ -7,8 +7,8 @@ import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 
 import {AppComponent} from './app.component';
 import {FullCalendarComponent} from './calendar/fullcalendar.component';
-import {CustomersComponent} from './customer/customers.component';
-import {OrderComponent} from './order/order.component';
+import {CustomerListComponent} from './customer/customer-list.component';
+import {OrderEditComponent} from './order/order-edit.component';
 import {OrderCustomerListComponent} from './order/customer-list.component';
 import {CustomerDetailComponent} from './customer/customer-detail.component';
 import {CustomerService, HttpCustomerService} from './services/customer.service';
@@ -24,6 +24,7 @@ import {MessagesComponent} from './messages/messages.component';
 
 import {registerLocaleData} from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
+import { CustomerEditComponent } from './customer/customer-edit.component';
 
 registerLocaleData(localeFr, 'fr');
 
@@ -39,11 +40,15 @@ registerLocaleData(localeFr, 'fr');
       },
       {
         path: 'orders/:id',
-        component: OrderComponent
+        component: OrderEditComponent
       },
       {
         path: 'customers',
-        component: CustomersComponent
+        component: CustomerListComponent
+      },
+      {
+        path: 'customers/:id',
+        component: CustomerEditComponent
       },
       {
         path: 'calendar',
@@ -60,14 +65,15 @@ registerLocaleData(localeFr, 'fr');
   declarations: [
     AppComponent,
     FullCalendarComponent,
-    CustomersComponent,
+    CustomerListComponent,
     CustomerDetailComponent,
     TimeSlotViewComponent,
-    OrderComponent,
+    OrderEditComponent,
     OrderCustomerListComponent,
     CustomerSearchComponent,
     OrderListComponent,
-    MessagesComponent
+    MessagesComponent,
+    CustomerEditComponent
   ],
   providers: [
     { provide: CustomerService, useClass: HttpCustomerService },

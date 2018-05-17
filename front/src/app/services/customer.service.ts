@@ -10,10 +10,16 @@ const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
 };
 
+export class SearchResult {
+  totalCount: number;
+  customers: Customer[];
+}
+
 export abstract class CustomerService {
-  abstract getCustomers(): Observable<Customer[]>;
+  abstract updateCustomer(customer: Customer): Observable<Customer>;
+  abstract getCustomers(page?: number, pageSize?: number): Observable<SearchResult>;
   abstract getCustomer(id: number): Observable<Customer>;
-  abstract searchCustomers(term: string): Observable<Customer[]>;
+  abstract searchCustomers(term: string, page?: number, pageSize?: number): Observable<SearchResult>;
   abstract createCustomer(customer: Customer): Observable<Customer>;
 }
 
@@ -23,16 +29,18 @@ export class HttpCustomerService implements CustomerService {
 
   constructor(private http: HttpClient) {}
 
-  getCustomers(): Observable<Customer[]> {
-    return this.http.get<Customer[]>(this.url).pipe(
-                catchError(this.handleError('getCustomers', []))
-            );
+  getCustomers(page?: number, pageSize?: number): Observable<SearchResult> {
+    let url = page ? this.url + '?page=' + page : this.url;
+    url = pageSize ? url + '&limit=' + pageSize : url;
+    return this.http.get<SearchResult>(this.url).pipe(
+        catchError(this.handleError<SearchResult>('getCustomers', null))
+    );
   }
 
   getCustomer(id: number): Observable<Customer> {
     const url = `${this.url}${id}`;
     return this.http.get<Customer>(url).pipe(
-      catchError(this.handleError<Customer>(`getCustomer id=${id}`))
+        catchError(this.handleError<Customer>(`getCustomer id=${id}`))
     );
   }
 
@@ -40,16 +48,26 @@ export class HttpCustomerService implements CustomerService {
     return this.http.post<Customer>(this.url, JSON.stringify(customer), httpOptions);
   }
 
+  updateCustomer(customer: Customer): Observable<Customer> {
+    return this.http.put<Customer>(this.url + customer.id, JSON.stringify(customer), httpOptions);
+  }
+
   /**
    * Look for customers matching the provided term
    */
-  searchCustomers(term: string): Observable<Customer[]> {
-    if (!term.trim()) {
-      // if not search term, return empty customer array.
-      return of([]);
+  searchCustomers(term: string, page?: number, pageSize?: number): Observable<SearchResult> {
+    term = term.trim();
+    let url = this.url;
+    if (term) {
+      url = url + '?name=' + term;
+      url = page ? url + '&page=' + page : url;
+      url = pageSize ? url + '&limit=' + pageSize : url;
+    } else {
+      url = page ? url + '?page=' + page : url;
+      url = pageSize ? url + '&limit=' + pageSize : url;
     }
-    return this.http.get<Customer[]>(`${this.url}?name=${term}`).pipe(
-      catchError(this.handleError<Customer[]>('searchCustomers', []))
+    return this.http.get<SearchResult>(url).pipe(
+      catchError(this.handleError<SearchResult>('searchCustomers', null))
     );
   }
 

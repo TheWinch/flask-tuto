@@ -5,22 +5,25 @@ import { concat } from 'rxjs/observable/concat';
 import { Subject } from 'rxjs/Subject';
 
 import {
-   debounceTime, distinctUntilChanged, switchMap
+   debounceTime, distinctUntilChanged, switchMap, map, tap
  } from 'rxjs/operators';
 
 import { Customer } from '../model/customer';
-import { CustomerService } from '../services/customer.service';
+import { CustomerService, SearchResult } from '../services/customer.service';
 import {MonoTypeOperatorFunction, OperatorFunction} from 'rxjs/interfaces';
 
 
 @Component({
   selector: 'osc-customers',
-  templateUrl: './customers.component.html',
-  styleUrls: ['./customers.component.css']
+  templateUrl: './customer-list.component.html',
+  styleUrls: ['./customer-list.component.css']
 })
-export class CustomersComponent implements OnInit {
+export class CustomerListComponent implements OnInit {
   customers$: Observable<Customer[]>;
   page = 1;
+  pageSize = 4;
+  collectionSize = 0;
+  searchTerm = '';
   private searchTerms = new Subject<string>();
 
   constructor(private customerService: CustomerService) { }
@@ -34,15 +37,12 @@ export class CustomersComponent implements OnInit {
     this.getCustomers();
   }
 
-  createCustomer(): void {
-  }
-
   deleteCustomer(customer: Customer): void {
   }
 
   getCustomers(): void {
      this.customers$ = concat(
-        this.customerService.getCustomers(),
+        this.customerService.searchCustomers(this.searchTerm, this.page, this.pageSize),
         this.searchTerms.pipe(
       // wait 300ms after each keystroke before considering the term
       debounceTime(300),
@@ -52,12 +52,17 @@ export class CustomersComponent implements OnInit {
 
       // switch to new search observable each time the term changes
       switchMap((term: string) => {
-        if (term != null && term.trim() !== '') {
-          return this.customerService.searchCustomers(term);
-        } else {
-          return Observable.of([]);
-        }
+        this.page = 1;
+        this.searchTerm = term.trim();
+        return this.customerService.searchCustomers(this.searchTerm, this.page, this.pageSize);
       })
-    ));
+    )).pipe(
+      tap((res: SearchResult) => this.collectionSize = res.totalCount),
+      map((res: SearchResult) => res.customers)
+    );
+  }
+
+  onPageChange(newPage: number): void {
+    this.getCustomers();
   }
 }

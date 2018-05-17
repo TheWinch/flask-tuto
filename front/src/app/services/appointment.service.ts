@@ -14,7 +14,7 @@ export class SearchOrdersResult {
 export abstract class AppointmentService {
   abstract getOrder(id): Observable<Order>;
 
-  abstract getOrders(page?: number): Observable<Order[]>;
+  abstract getOrders(page?: number, pageSize?: number): Observable<Order[]>;
 
   abstract searchOrders(page?: number, pageSize?: number, term?: string): Observable<SearchOrdersResult>;
 
@@ -37,8 +37,9 @@ export class HttpAppointmentService implements AppointmentService {
     return this.http.get<Order>(this.url + id);
   }
 
-  getOrders(page?: number): Observable<Order[]> {
-    const url = page ? this.url + '?page=' + page : this.url;
+  getOrders(page?: number, pageSize?: number): Observable<Order[]> {
+    let url = page ? this.url + '?page=' + page : this.url;
+    url = pageSize ? url + '&limit=' + pageSize : url;
     return this.http.get<Order[]>(url).pipe(
       catchError(this.handleError('getOrders', []))
     );

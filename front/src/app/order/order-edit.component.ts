@@ -24,9 +24,9 @@ import { OrderModel, EventFlipResult } from '../model/order.model';
 
 @Component({
   selector: 'osc-order-details',
-  templateUrl: './order.component.html'
+  templateUrl: './order-edit.component.html'
 })
-export class OrderComponent implements OnInit {
+export class OrderEditComponent implements OnInit {
   title: string;
   calendarOptions: Options;
   @ViewChild(FullCalendarComponent) ucCalendar: FullCalendarComponent;
@@ -79,7 +79,7 @@ export class OrderComponent implements OnInit {
   private buildEvents(allEvents: Event[]): any[] {
     return allEvents.map(e => {
       e = Object.assign(e, { title: e.capacity + ' restant(s)' });
-      OrderComponent.formatEvent(e, this.orderModel.containsEvent(e.id), this.orderModel.currentCustomerEvents.some(c => c.id === e.id));
+      OrderEditComponent.formatEvent(e, this.orderModel.containsEvent(e.id), this.orderModel.currentCustomerEvents.some(c => c.id === e.id));
       return e;
     }, this);
   }
@@ -121,7 +121,7 @@ export class OrderComponent implements OnInit {
     const removedEventIds = this.orderModel.removeCustomer(customer);
     removedEventIds.forEach(id => {
       const event = this.ucCalendar.fullCalendar('clientEvents', id)[0];
-      OrderComponent.formatEvent(event, this.orderModel.containsEvent(id),
+      OrderEditComponent.formatEvent(event, this.orderModel.containsEvent(id),
                                  this.orderModel.currentCustomerEvents.some(c => c.id === event.id));
       event.capacity = event.capacity + 1;
       event.title = event.capacity + ' restant(s)';
@@ -142,10 +142,10 @@ export class OrderComponent implements OnInit {
     }
     if (result === EventFlipResult.SELECT) {
       event.capacity = event.capacity - 1;
-      OrderComponent.formatEvent(event, true, true);
+      OrderEditComponent.formatEvent(event, true, true);
     } else {
       event.capacity = event.capacity + 1;
-      OrderComponent.formatEvent(event, this.orderModel.containsEvent(event.id), false);
+      OrderEditComponent.formatEvent(event, this.orderModel.containsEvent(event.id), false);
     }
     event.title = event.capacity + ' restant(s)';
     this.ucCalendar.updateEvent(event);
@@ -184,12 +184,12 @@ export class OrderComponent implements OnInit {
 
     eventUpdates.unselectedEventIds.forEach(id => {
       const event = this.ucCalendar.fullCalendar('clientEvents', id)[0];
-      OrderComponent.formatEvent(event, this.orderModel.containsEvent(id), false);
+      OrderEditComponent.formatEvent(event, this.orderModel.containsEvent(id), false);
       this.ucCalendar.updateEvent(event);
     });
     eventUpdates.selectedEventIds.forEach(id => {
       const event = this.ucCalendar.fullCalendar('clientEvents', id)[0];
-      OrderComponent.formatEvent(event, true, true);
+      OrderEditComponent.formatEvent(event, true, true);
       this.ucCalendar.updateEvent(event);
     });
   }

@@ -3,7 +3,7 @@
 All operations to manage the orders.
 """
 from flask import request
-from flask_restplus import Resource, fields, reqparse
+from flask_restplus import Resource, fields, reqparse, abort
 
 from app import models, db
 from app.apis import api, UrlWithUid
@@ -89,11 +89,11 @@ class OrderList(Resource):
         if args['limit'] is None:
             limit = 4
         else:
-            limit= args['limit']
+            limit = args['limit']
         if args['name'] is not None:
             orders, total_count = models.Order.load_all_by_customer(args['name'], args['page'], limit)
         else:
-            orders, total_count = models.Order.load_all(args['page'], args['limit'])
+            orders, total_count = models.Order.load_all(args['page'], limit)
         return SearchResult(total_count, orders)
 
     @ns.marshal_with(order_model, code=201)
@@ -135,7 +135,10 @@ class Order(Resource):
     @ns.marshal_with(order_model)
     def get(self, uid):
         """Get a particular order"""
-        return models.Order.load(uid)
+        order = models.Order.load(uid)
+        if order is None:
+            return abort(404)
+        return order
 
     def delete(self, uid):
         """Delete a particular order"""
@@ -147,6 +150,8 @@ class Order(Resource):
     def put(self, uid):
         """Replaces the order with a new definition"""
         order = models.Order.load(uid)
+        if order is None:
+            return abort(404)
         data = request.json
         appointments = set(WrappedAppointment(
             models.Appointment(customer_id=appointment['customerId'], order_id=order.id,

@@ -1,0 +1,34 @@
+<div *ngIf="loading"></div>
+<form class="form-horizontal" *ngIf="!loading">
+    <fieldset>
+    <div class="form-group row">
+        <label for="firstName" class="col-lg-2 col-form-label text-align-right">Prénom</label>
+        <div class="col-lg-10">
+        <input type="text" class="form-control" name="firstName" [(ngModel)]="newCustomer.firstName" placeholder="Prénom">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="lastName" class="col-lg-2 col-form-label">Nom de famille</label>
+        <div class="col-lg-10">
+        <input type="text" class="form-control" name="lastName" [(ngModel)]="newCustomer.lastName" placeholder="Nom de famille">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="lastName" class="col-lg-2 col-form-label">Téléphone</label>
+        <div class="col-lg-10">
+        <input type="text" class="form-control" name="phone" [(ngModel)]="newCustomer.phone" placeholder="Téléphone">
+        </div>
+    </div>
+    <br>
+    <div class="form-group row">
+        <label for="email" class="col-lg-2 col-form-label">Email</label>
+        <div class="col-lg-10">
+        <input type="email" class="form-control" name="email" [(ngModel)]="newCustomer.email" placeholder="email">
+        </div>
+    </div>
+    </fieldset>
+</form>
+<div *ngIf="!loading">
+    <button type="button" class="btn btn-danger" (click)="onCancel()">Annuller</button>
+    <button type="button" class="btn btn-primary" (click)="onSave()">Sauver</button>
+</div>

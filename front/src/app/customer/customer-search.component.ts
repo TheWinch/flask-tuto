@@ -5,10 +5,10 @@ import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 
 import {
-  debounceTime, distinctUntilChanged, switchMap, tap
+  debounceTime, distinctUntilChanged, switchMap, tap, map
 } from 'rxjs/operators';
 
-import { CustomerService } from '../services/customer.service';
+import { CustomerService, SearchResult } from '../services/customer.service';
 import { Customer } from '../model/customer';
 
 @Component({
@@ -67,7 +67,8 @@ export class CustomerSearchComponent implements OnInit {
       distinctUntilChanged(),
 
       // switch to new search observable each time the term changes
-      switchMap((term: string) => this.customerService.searchCustomers(term))
+      switchMap((term: string) => this.customerService.searchCustomers(term)),
+      map((result: SearchResult) => result.customers)
     );
   }
 

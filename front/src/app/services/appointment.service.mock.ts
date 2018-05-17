@@ -128,7 +128,7 @@ export class AppointmentServiceMock implements AppointmentService {
     return Observable.of(this.orders.find(order => order.id === id));
   }
 
-  public getOrders(page?: number): Observable<Order[]> {
+  public getOrders(page?: number, pageSize?: number): Observable<Order[]> {
     return Observable.of(this.orders);
   }
 

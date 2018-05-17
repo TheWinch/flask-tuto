@@ -3,7 +3,7 @@
 All DB models for the application.
 """
 from dateutil.parser import parse
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, desc, asc, func, distinct
 
 from app import db
 
@@ -23,18 +23,32 @@ class Customer(db.Model):
         return '<User %r %r>' % (self.firstname, self.lastname)
 
     @staticmethod
-    def load_all():
-        return Customer.query.all()
+    def load_all(page=None, limit=10):
+        if page is None:
+            all_customers = Customer.query.order_by(Customer.id, asc(Customer.id)).all()
+            return all_customers, len(all_customers)
+        else:
+            start, stop = (page-1)*limit, page*limit
+            customers_count = db.session.query(func.count(Customer.id)).scalar()
+            return Customer.query.order_by(Customer.id, asc(Customer.id)).slice(start, stop).all(), customers_count
 
     @staticmethod
     def load(cid):
         return Customer.query.get(cid)
 
     @staticmethod
-    def load_by_name(pattern):
-        return Customer.query.filter(or_(Customer.firstname.like('%' + pattern + '%'),
-                                         Customer.lastname.like('%' + pattern + '%'),
-                                         Customer.email.like('%' + pattern + '%'))).all()
+    def load_by_name(pattern, page=None, limit=10):
+        query = Customer.query.filter(or_(Customer.firstname.like('%' + pattern + '%'),
+                                          Customer.lastname.like('%' + pattern + '%'),
+                                          Customer.email.like('%' + pattern + '%')))
+        if page is None:
+            result = query.all()
+            return result, len(result)
+        else:
+            start, stop = (page-1)*limit, page*limit
+            result = query.slice(start, stop)
+            customers_count = query.count()
+            return result, customers_count
 
     def create(self):
         db.session.add(self)
@@ -62,23 +76,38 @@ class Order(db.Model):
 
     @staticmethod
     def load_all(page=None, limit=10):
-        allOrders = Order.query.all() # TODO - find how to get the count estimate
         if page is None:
-            return allOrders, len(allOrders)
+            all_orders = Order.query.order_by(Order.id, desc(Order.id)).all()
+            return all_orders, len(all_orders)
         else:
             start, stop = (page-1)*limit, page*limit
-            return Order.query.slice(start, stop).all(), len(allOrders)
+            count = db.session.query(func.count(Order.id)).scalar()
+            return Order.query.order_by(Order.id, desc(Order.id)).slice(start, stop), count
 
     @staticmethod
-    def load_all_by_customer(searchTerm, page=None, limit=10):
-        # TODO- find how to express criterion on order's customers
-        query = Order.query.filter(or_(Order.appointments.customer.firstname.like('%' + searchTerm + '%'),
-                                       Order.appointments.customer.lastname.like('%' + searchTerm + '%'),
-                                       Order.appointments.customer.email.like('%' + searchTerm + '%')))
+    def load_all_by_customer(search_term, page=None, limit=10):
+        query = db.session.query(Order).select_from(Customer).\
+            join(Customer.appointments).\
+            join(Appointment.order). \
+            filter(or_(Customer.firstname.like('%' + search_term + '%'),
+                       Customer.lastname.like('%' + search_term + '%'),
+                       Customer.email.like('%' + search_term + '%'))).distinct()
+
+        #query = Order.query.join(Order.appointments).join(matching_customers, Appointment.customer_id==matching_customers.id)
+
+        #query = Order.query.join(Order.appointments, Appointment.customer).\
+        #                    filter(or_(Customer.firstname.like('%' + search_term + '%'),
+        #                               Customer.lastname.like('%' + search_term + '%'),
+        #                               Customer.email.like('%' + search_term + '%')))
+
         if page is None:
-            return query.all()
-        start, stop = (page-1)*limit, page*limit
-        return query.slice(start, stop).all(), 10
+            result = query.all()
+            return result, len(result)
+        else:
+            start, stop = (page-1)*limit, page*limit
+            count = query.count()
+            result = query.slice(start, stop)
+            return result, count
 
     @staticmethod
     def load(oid):
