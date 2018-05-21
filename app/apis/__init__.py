@@ -3,7 +3,7 @@
 API façade for the project. All code that depends on Flask-RESTPlus goes here.
 """
 from flask import Blueprint
-from flask_restplus import Api, fields
+from flask_restplus import Api, fields, reqparse
 from flask_restplus.fields import to_marshallable_type
 
 api = Api(  # pylint: disable=invalid-name
@@ -16,10 +16,18 @@ class UrlWithUid(fields.Url):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def output(self, key, obj):
+    def output(self, key, obj, **kwargs):
         to_marshal = to_marshallable_type(obj)
         to_marshal['uid'] = obj.id
         return super().output(key, to_marshal)
+
+
+def make_paged_search_parser():
+    parser = reqparse.RequestParser()
+    parser.add_argument('name', required=False, trim=True, action='split')
+    parser.add_argument('page', type=int, required=False)
+    parser.add_argument('limit', type=int, required=False)
+    return parser
 
 
 def init_app(app):

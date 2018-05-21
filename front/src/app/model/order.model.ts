@@ -127,10 +127,10 @@ export class OrderModel {
         if (this._currentCustomer != null && this._currentCustomer.id === customer.id) {
             this._currentCustomer = null;
         }
+        this._selections = ImmutableArrays.removeMatching(this._selections, sel => sel.customer.id === customer.id);
         if (this._contactId === customer.id) {
             this._contactId = this._selections.length === 0 ? null : this._selections[0].customer.id;
         }
-        this._selections = ImmutableArrays.removeMatching(this._selections, sel => sel.customer.id === customer.id);
         return removedChoices.map(choice => choice.id);
     }
 

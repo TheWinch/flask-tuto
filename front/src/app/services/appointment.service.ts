@@ -1,4 +1,5 @@
 import {Order} from '../model/order';
+import {buildSearchUrl} from './service-utils';
 
 import {Observable} from 'rxjs/Observable';
 import {of} from 'rxjs/observable/of';
@@ -38,17 +39,14 @@ export class HttpAppointmentService implements AppointmentService {
   }
 
   getOrders(page?: number, pageSize?: number): Observable<Order[]> {
-    let url = page ? this.url + '?page=' + page : this.url;
-    url = pageSize ? url + '&limit=' + pageSize : url;
+    const url = buildSearchUrl(this.url, '', page, pageSize);
     return this.http.get<Order[]>(url).pipe(
       catchError(this.handleError('getOrders', []))
     );
   }
 
   searchOrders(page?: number, pageSize?: number, term?: string): Observable<SearchOrdersResult> {
-    let url = page ? this.url + '?page=' + page : this.url;
-    url = pageSize ? url + '&limit=' + pageSize : url;
-    url = term ? url + '&name=' + term : url;
+    const url = buildSearchUrl(this.url, term, page, pageSize);
     return this.http.get<SearchOrdersResult>(url).pipe(
       catchError(this.handleError<SearchOrdersResult>('searchOrders', {totalCount: 0, orders: []}))
     );

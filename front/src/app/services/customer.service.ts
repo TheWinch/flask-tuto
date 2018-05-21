@@ -5,6 +5,7 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable} from 'rxjs/Observable';
 import {of} from 'rxjs/observable/of';
 import {catchError} from 'rxjs/operators';
+import { buildSearchUrl } from './service-utils';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -30,8 +31,7 @@ export class HttpCustomerService implements CustomerService {
   constructor(private http: HttpClient) {}
 
   getCustomers(page?: number, pageSize?: number): Observable<SearchResult> {
-    let url = page ? this.url + '?page=' + page : this.url;
-    url = pageSize ? url + '&limit=' + pageSize : url;
+    const url = buildSearchUrl(this.url, null, page, pageSize);
     return this.http.get<SearchResult>(this.url).pipe(
         catchError(this.handleError<SearchResult>('getCustomers', null))
     );
@@ -56,16 +56,7 @@ export class HttpCustomerService implements CustomerService {
    * Look for customers matching the provided term
    */
   searchCustomers(term: string, page?: number, pageSize?: number): Observable<SearchResult> {
-    term = term.trim();
-    let url = this.url;
-    if (term) {
-      url = url + '?name=' + term;
-      url = page ? url + '&page=' + page : url;
-      url = pageSize ? url + '&limit=' + pageSize : url;
-    } else {
-      url = page ? url + '?page=' + page : url;
-      url = pageSize ? url + '&limit=' + pageSize : url;
-    }
+    const url = buildSearchUrl(this.url, term, page, pageSize);
     return this.http.get<SearchResult>(url).pipe(
       catchError(this.handleError<SearchResult>('searchCustomers', null))
     );

@@ -55,20 +55,20 @@ const REFERENCE_CHOICES: EventChoice[] = [
 const SAMPLE_ORDER: Order = {
   id: 123,
   title: 'Some title',
-  contactId: 1,
+  contactId: REFERENCE_CUSTOMER.id,
   appointments: [
     {
       id: 987,
-      customerId: 1,
+      customerId: REFERENCE_CUSTOMER.id,
       orderId: 123,
-      slotId: 3,
+      slotId: REFERENCE_EVENTS[2].id,
       start: '12/02/2018T08:00:00'
     },
     {
       id: 1024,
-      customerId: 2,
+      customerId: ALTERNATE_CUSTOMER.id,
       orderId: 123,
-      slotId: 2,
+      slotId: REFERENCE_EVENTS[1].id,
       start: '12/02/2018T10:00:00'
     }
   ]
@@ -194,9 +194,25 @@ describe('OrderModel', () => {
     const removedChoices = this.model.removeCustomer(REFERENCE_CUSTOMER);
 
     expect(this.model.containsCustomer(REFERENCE_CUSTOMER)).toBeFalsy();
-    expect(this.model.containsEvent(REFERENCE_EVENTS[2])).toBeFalsy();
-    expect(this.model.containsEvent(REFERENCE_EVENTS[1])).toBeTruthy();
-    expect(this.model.contactId).toBeNull();
-    expect(removedChoices).toEqual([3]);
+    expect(this.model.containsEvent(REFERENCE_EVENTS[2].id)).toBeFalsy();
+    expect(removedChoices).toEqual([REFERENCE_EVENTS[2].id]);
+  });
+
+  it('still contains other customer events once a customer is removed', () => {
+    this.model = new OrderModel(SAMPLE_ORDER, [REFERENCE_CUSTOMER, ALTERNATE_CUSTOMER]);
+    this.model.setCurrentCustomer(REFERENCE_CUSTOMER);
+
+    this.model.removeCustomer(REFERENCE_CUSTOMER);
+
+    expect(this.model.containsEvent(REFERENCE_EVENTS[1].id)).toBeTruthy();
+  });
+
+  it('switches contact to the next customer in order', () => {
+    this.model = new OrderModel(SAMPLE_ORDER, [REFERENCE_CUSTOMER, ALTERNATE_CUSTOMER]);
+    this.model.setCurrentCustomer(REFERENCE_CUSTOMER);
+
+    this.model.removeCustomer(REFERENCE_CUSTOMER);
+
+    expect(this.model.contactId).toEqual(ALTERNATE_CUSTOMER.id);
   });
 });

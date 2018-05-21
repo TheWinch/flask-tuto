@@ -37,10 +37,16 @@ class Customer(db.Model):
         return Customer.query.get(cid)
 
     @staticmethod
-    def load_by_name(pattern, page=None, limit=10):
-        query = Customer.query.filter(or_(Customer.firstname.like('%' + pattern + '%'),
-                                          Customer.lastname.like('%' + pattern + '%'),
-                                          Customer.email.like('%' + pattern + '%')))
+    def load_by_name(patterns, page=None, limit=10):
+        query = Customer.query
+        ors = []
+        for pattern in patterns:
+            ors.append(
+                or_(Customer.firstname.like('%' + pattern + '%'),
+                    Customer.lastname.like('%' + pattern + '%'),
+                    Customer.email.like('%' + pattern + '%'))
+            )
+        query = query.filter(and_(*ors))
         if page is None:
             result = query.all()
             return result, len(result)
@@ -85,20 +91,18 @@ class Order(db.Model):
             return Order.query.order_by(Order.id, desc(Order.id)).slice(start, stop), count
 
     @staticmethod
-    def load_all_by_customer(search_term, page=None, limit=10):
+    def load_all_by_customer(patterns, page=None, limit=10):
         query = db.session.query(Order).select_from(Customer).\
             join(Customer.appointments).\
-            join(Appointment.order). \
-            filter(or_(Customer.firstname.like('%' + search_term + '%'),
-                       Customer.lastname.like('%' + search_term + '%'),
-                       Customer.email.like('%' + search_term + '%'))).distinct()
-
-        #query = Order.query.join(Order.appointments).join(matching_customers, Appointment.customer_id==matching_customers.id)
-
-        #query = Order.query.join(Order.appointments, Appointment.customer).\
-        #                    filter(or_(Customer.firstname.like('%' + search_term + '%'),
-        #                               Customer.lastname.like('%' + search_term + '%'),
-        #                               Customer.email.like('%' + search_term + '%')))
+            join(Appointment.order)
+        ors = []
+        for pattern in patterns:
+            ors.append(
+                or_(Customer.firstname.like('%' + pattern + '%'),
+                    Customer.lastname.like('%' + pattern + '%'),
+                    Customer.email.like('%' + pattern + '%'))
+            )
+        query = query.filter(and_(*ors)).distinct()
 
         if page is None:
             result = query.all()

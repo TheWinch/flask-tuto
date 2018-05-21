@@ -6,7 +6,7 @@ from flask import request
 from flask_restplus import Resource, fields, reqparse, abort
 
 from app import models, db
-from app.apis import api, UrlWithUid
+from app.apis import api, UrlWithUid, make_paged_search_parser
 
 ns = api.namespace('orders', description='Orders operations')
 
@@ -19,7 +19,7 @@ class FirstAndLastName(fields.Raw):
     def __init__(self, **kwargs):
         super(FirstAndLastName, self).__init__(**kwargs)
 
-    def output(self, key, obj):
+    def output(self, key, obj, **kwargs):
         actual_key = key if self.attribute is None else self.attribute
         firstname = fields.get_value(actual_key + '.firstname', obj)
         lastname = fields.get_value(actual_key + '.lastname', obj)
@@ -60,14 +60,6 @@ order_list_model = ns.model('OrderList', {
 })
 
 
-def make_get_parser():
-    parser = reqparse.RequestParser()
-    parser.add_argument('name', required=False)
-    parser.add_argument('page', type=int, required=False)
-    parser.add_argument('limit', type=int, required=False)
-    return parser
-
-
 class SearchResult:
     def __init__(self, total_count, orders):
         self.total_count = total_count
@@ -81,10 +73,10 @@ class OrderList(Resource):
     """
 
     @ns.marshal_with(order_list_model)
-    @ns.expect(make_get_parser())
+    @ns.expect(make_paged_search_parser())
     def get(self):
         """Get the list of all orders"""
-        parser = make_get_parser()
+        parser = make_paged_search_parser()
         args = parser.parse_args()
         if args['limit'] is None:
             limit = 4

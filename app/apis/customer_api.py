@@ -7,7 +7,7 @@ from flask_restplus import Resource, fields, reqparse, abort
 from sqlalchemy.exc import IntegrityError
 
 from app import models
-from app.apis import api, UrlWithUid
+from app.apis import api, UrlWithUid, make_paged_search_parser
 
 ns = api.namespace('customers', description='Customers operations')
 
@@ -27,14 +27,6 @@ customer_list_model = ns.model('CustomerList', {
 })
 
 
-def make_get_parser():
-    parser = reqparse.RequestParser()
-    parser.add_argument('name', required=False)
-    parser.add_argument('page', type=int, required=False)
-    parser.add_argument('limit', type=int, required=False)
-    return parser
-
-
 class SearchResult:
     def __init__(self, total_count, customers):
         self.total_count = total_count
@@ -48,10 +40,10 @@ class CustomerList(Resource):
     """
 
     @ns.marshal_list_with(customer_list_model)
-    @ns.expect(make_get_parser())
+    @ns.expect(make_paged_search_parser())
     def get(self):
         """Get the list of all customers, possibly filtered by name"""
-        parser = make_get_parser()
+        parser = make_paged_search_parser()
         args = parser.parse_args()
         if args['limit'] is None:
             limit = 4
