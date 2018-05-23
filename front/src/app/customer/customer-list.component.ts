@@ -11,6 +11,8 @@ import {
 import { Customer } from '../model/customer';
 import { CustomerService, SearchResult } from '../services/customer.service';
 import {MonoTypeOperatorFunction, OperatorFunction} from 'rxjs/interfaces';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -25,8 +27,10 @@ export class CustomerListComponent implements OnInit {
   collectionSize = 0;
   searchTerm = '';
   private searchTerms = new Subject<string>();
+  newCustomer: Customer;
 
-  constructor(private customerService: CustomerService) { }
+  constructor(private modalService: NgbModal, private customerService: CustomerService,
+              private router: Router) { }
 
   // Push a search term into the observable stream.
   search(term: string): void {
@@ -35,7 +39,21 @@ export class CustomerListComponent implements OnInit {
 
   ngOnInit(): void {
     this.getCustomers();
+    this.resetCustomerTemplate();
   }
+
+  showCustomerCreationModal(content) {
+    this.modalService.open(content, {size: 'lg'}).result.then((result) => {
+      this.customerService.createCustomer(this.newCustomer).subscribe(res => {
+        //this.resetCustomerTemplate();
+        this.router.navigate(['customers', res.id]);
+      }, err => {
+        console.log('An error occured while creating the customer: ' + err);
+      });
+    }, (reason) => {
+    });
+  }
+
 
   deleteCustomer(customer: Customer): void {
   }
@@ -64,5 +82,14 @@ export class CustomerListComponent implements OnInit {
 
   onPageChange(newPage: number): void {
     this.getCustomers();
+  }
+
+  private resetCustomerTemplate(): void {
+    this.newCustomer = {
+      firstName: '',
+      lastName: '',
+      phone: '',
+      email: ''
+    };
   }
 }

@@ -20,7 +20,7 @@ class DateTimeFromDuration(fields.DateTime):
         super(DateTimeFromDuration, self).__init__(**kwargs)
         self.duration_attribute = duration_attribute
 
-    def output(self, key, obj):
+    def output(self, key, obj, **kwargs):
         date = fields.get_value(key if self.attribute is None else self.attribute, obj)
         duration = fields.get_value(
             'duration' if self.duration_attribute is None else self.duration_attribute, obj)
@@ -41,7 +41,7 @@ class UsedCapacity(fields.Raw):
     def __init__(self, **kwargs):
         super(UsedCapacity, self).__init__(**kwargs)
 
-    def output(self, key, obj):
+    def output(self, key, obj, **kwargs):
         value = fields.get_value('appointments', obj)
         if value is None:
             value = []

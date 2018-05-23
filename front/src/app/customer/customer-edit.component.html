@@ -1,34 +1,60 @@
-<div *ngIf="loading"></div>
+<div *ngIf="loading">Chargement en cours...</div>
 <form class="form-horizontal" *ngIf="!loading">
     <fieldset>
     <div class="form-group row">
         <label for="firstName" class="col-lg-2 col-form-label text-align-right">Prénom</label>
         <div class="col-lg-10">
-        <input type="text" class="form-control" name="firstName" [(ngModel)]="newCustomer.firstName" placeholder="Prénom">
+            <osc-inline-edit name="firstName" [(ngModel)]="customer.firstName" type="text"
+                        placeholder="Saisissez le prénom" (onSave)="onSave()"></osc-inline-edit>
         </div>
     </div>
     <div class="form-group row">
         <label for="lastName" class="col-lg-2 col-form-label">Nom de famille</label>
         <div class="col-lg-10">
-        <input type="text" class="form-control" name="lastName" [(ngModel)]="newCustomer.lastName" placeholder="Nom de famille">
+            <osc-inline-edit name="lastName" [(ngModel)]="customer.lastName" type="text"
+            placeholder="Saisissez le nom de famille" (onSave)="onSave()"></osc-inline-edit>
         </div>
     </div>
     <div class="form-group row">
         <label for="lastName" class="col-lg-2 col-form-label">Téléphone</label>
         <div class="col-lg-10">
-        <input type="text" class="form-control" name="phone" [(ngModel)]="newCustomer.phone" placeholder="Téléphone">
+            <osc-inline-edit name="phone" [(ngModel)]="customer.phone" type="text"
+            placeholder="Saisissez le téléphone" (onSave)="onSave()"></osc-inline-edit>
         </div>
     </div>
     <br>
     <div class="form-group row">
         <label for="email" class="col-lg-2 col-form-label">Email</label>
         <div class="col-lg-10">
-        <input type="email" class="form-control" name="email" [(ngModel)]="newCustomer.email" placeholder="email">
+            <osc-inline-edit name="email" [(ngModel)]="customer.email" type="text"
+            placeholder="Saisissez l'email" (onSave)="onSave()"></osc-inline-edit>
         </div>
     </div>
     </fieldset>
 </form>
 <div *ngIf="!loading">
-    <button type="button" class="btn btn-danger" (click)="onCancel()">Annuller</button>
-    <button type="button" class="btn btn-primary" (click)="onSave()">Sauver</button>
+    <button type="button" class="btn btn-danger" (click)="onCancel()">Retour</button>
 </div>
+<br/>
+<h2>Commandes</h2>
+<div *ngIf="!loading" class="col-9">
+    <button type="button" class="btn btn-success" (click)="createOrder()">Nouvelle commande</button>
+    <table class="table table-hover mt-3">
+        <thead>
+        <tr>
+        <th scope="col">Commande</th>
+        <th scope="col">Nombre de cours</th>
+        <th scope="col">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let order of orders$ | async">
+            <td>{{ order.title }}</td>
+            <td>{{ order.appointments.length}}</td>
+            <td><a (click)="editOrder(order)" class="badge badge-pill badge-primary" style="cursor: pointer; color: white">Editer</a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div class="w-100" ></div>
+    

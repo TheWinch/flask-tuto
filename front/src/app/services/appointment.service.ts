@@ -5,7 +5,7 @@ import {Observable} from 'rxjs/Observable';
 import {of} from 'rxjs/observable/of';
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {catchError} from 'rxjs/operators';
+import {catchError, map} from 'rxjs/operators';
 
 export class SearchOrdersResult {
   totalCount: number;
@@ -16,6 +16,8 @@ export abstract class AppointmentService {
   abstract getOrder(id): Observable<Order>;
 
   abstract getOrders(page?: number, pageSize?: number): Observable<Order[]>;
+
+  abstract getOrdersByCustomer(customerId: number): Observable<Order[]>;
 
   abstract searchOrders(page?: number, pageSize?: number, term?: string): Observable<SearchOrdersResult>;
 
@@ -40,10 +42,20 @@ export class HttpAppointmentService implements AppointmentService {
 
   getOrders(page?: number, pageSize?: number): Observable<Order[]> {
     const url = buildSearchUrl(this.url, '', page, pageSize);
-    return this.http.get<Order[]>(url).pipe(
+    return this.http.get<SearchOrdersResult>(url).pipe(
+      map((result: SearchOrdersResult) => result.orders),
       catchError(this.handleError('getOrders', []))
     );
   }
+
+  getOrdersByCustomer(customerId: number): Observable<Order[]> {
+    const url = this.url + '?customerId=' + customerId;
+    return this.http.get<SearchOrdersResult>(url).pipe(
+      map((result: SearchOrdersResult) => result.orders),
+      catchError(this.handleError('getOrders', []))
+    );
+  }
+
 
   searchOrders(page?: number, pageSize?: number, term?: string): Observable<SearchOrdersResult> {
     const url = buildSearchUrl(this.url, term, page, pageSize);

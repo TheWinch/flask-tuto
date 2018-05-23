@@ -66,6 +66,11 @@ class SearchResult:
         self.orders = orders
 
 
+def make_search_parser():
+    parser = make_paged_search_parser()
+    parser.add_argument('customerId', type=int, required=False)
+    return parser
+
 @ns.route('/')
 class OrderList(Resource):
     """
@@ -73,17 +78,21 @@ class OrderList(Resource):
     """
 
     @ns.marshal_with(order_list_model)
-    @ns.expect(make_paged_search_parser())
+    @ns.expect(make_search_parser())
     def get(self):
         """Get the list of all orders"""
-        parser = make_paged_search_parser()
+        parser = make_search_parser()
         args = parser.parse_args()
+        if args['customerId'] is not None:
+            orders, total_count = models.Order.load_all_by_customer(args['customerId'])
+            return SearchResult(total_count, orders)
+
         if args['limit'] is None:
             limit = 4
         else:
             limit = args['limit']
         if args['name'] is not None:
-            orders, total_count = models.Order.load_all_by_customer(args['name'], args['page'], limit)
+            orders, total_count = models.Order.load_all_matching(args['name'], args['page'], limit)
         else:
             orders, total_count = models.Order.load_all(args['page'], limit)
         return SearchResult(total_count, orders)

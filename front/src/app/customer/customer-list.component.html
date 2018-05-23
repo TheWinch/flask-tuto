@@ -1,5 +1,47 @@
 <osc-messages></osc-messages>
-<div class="row justify-content-center">
+<ng-template #customerCreationModal let-c="close" let-d="dismiss">
+    <div class="modal-header">
+      <h5 class="modal-title">Créer un client</h5>
+      <button type="button" class="close" aria-label="Close" (click)="d('abort')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form class="form-horizontal">
+        <fieldset>
+          <div class="form-group row">
+            <label for="firstName" class="col-lg-2 col-form-label text-align-right">Prénom</label>
+            <div class="col-lg-10">
+              <input type="text" class="form-control" name="firstName" [(ngModel)]="newCustomer.firstName" placeholder="Prénom">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="lastName" class="col-lg-2 col-form-label">Nom de famille</label>
+            <div class="col-lg-10">
+              <input type="text" class="form-control" name="lastName" [(ngModel)]="newCustomer.lastName" placeholder="Nom de famille">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="lastName" class="col-lg-2 col-form-label">Téléphone</label>
+            <div class="col-lg-10">
+              <input type="text" class="form-control" name="phone" [(ngModel)]="newCustomer.phone" placeholder="Téléphone">
+            </div>
+          </div>
+          <br>
+          <div class="form-group row">
+            <label for="email" class="col-lg-2 col-form-label">Email</label>
+            <div class="col-lg-10">
+              <input type="email" class="form-control" name="email" [(ngModel)]="newCustomer.email" placeholder="email">
+            </div>
+          </div>
+        </fieldset>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" (click)="c('confirm')">Confirmer</button>
+    </div>
+  </ng-template>
+  <div class="row justify-content-center">
   <div class="col-6">
     <div class="input-group mt-2 align-middle">
       <input #searchBox type="text"
@@ -8,7 +50,7 @@
              placeholder="Filtre par nom ou email..."
              style="width: 100%;"/>
       <span class="input-group-btn">
-        <button class="btn btn-success" type="button" routerLink="/customers/new">
+        <button class="btn btn-success" type="button" (click)="showCustomerCreationModal(customerCreationModal)">
           <i class="fa fa-plus-circle"></i>
           Ajouter un client
         </button>

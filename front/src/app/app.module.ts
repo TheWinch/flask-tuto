@@ -1,30 +1,31 @@
-import {BrowserModule} from '@angular/platform-browser';
-import {NgModule} from '@angular/core';
-import {RouterModule} from '@angular/router';
-import {HttpClientModule} from '@angular/common/http';
-import {FormsModule} from '@angular/forms';
-import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
-import {AppComponent} from './app.component';
-import {FullCalendarComponent} from './calendar/fullcalendar.component';
-import {CustomerListComponent} from './customer/customer-list.component';
-import {OrderEditComponent} from './order/order-edit.component';
-import {OrderCustomerListComponent} from './order/customer-list.component';
-import {CustomerDetailComponent} from './customer/customer-detail.component';
-import {CustomerService, HttpCustomerService} from './services/customer.service';
-import {CustomerServiceMock} from './services/customer.service.mock';
-import {EventService, HttpEventService} from './services/event.service';
-import {EventServiceMock} from './services/event.service.mock';
-import {TimeSlotViewComponent} from './calendar/timeslotview.component';
-import {CustomerSearchComponent} from './customer/customer-search.component';
-import {AppointmentService, HttpAppointmentService} from './services/appointment.service';
-import {AppointmentServiceMock} from './services/appointment.service.mock';
-import {OrderListComponent} from './order/order-list.component';
-import {MessagesComponent} from './messages/messages.component';
-
-import {registerLocaleData} from '@angular/common';
-import localeFr from '@angular/common/locales/fr';
+import { AppComponent } from './app.component';
+import { FullCalendarComponent } from './calendar/fullcalendar.component';
+import { TimeSlotViewComponent } from './calendar/timeslotview.component';
+import { CustomerListComponent } from './customer/customer-list.component';
 import { CustomerEditComponent } from './customer/customer-edit.component';
+import { CustomerDetailComponent } from './customer/customer-detail.component';
+import { CustomerSearchComponent } from './customer/customer-search.component';
+import { OrderEditComponent } from './order/order-edit.component';
+import { OrderListComponent } from './order/order-list.component';
+import { OrderCustomerListComponent } from './order/customer-list.component';
+import { CustomerService, HttpCustomerService } from './services/customer.service';
+import { CustomerServiceMock } from './services/customer.service.mock';
+import { EventService, HttpEventService } from './services/event.service';
+import { EventServiceMock } from './services/event.service.mock';
+import { AppointmentService, HttpAppointmentService } from './services/appointment.service';
+import { AppointmentServiceMock } from './services/appointment.service.mock';
+import { MessagesComponent } from './messages/messages.component';
+import { InlineEditorComponent } from './utils/inline-editor.component';
+
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
 
 registerLocaleData(localeFr, 'fr');
 
@@ -60,8 +61,8 @@ registerLocaleData(localeFr, 'fr');
         pathMatch: 'full'
       }
     ]),
-    NgbModule.forRoot()
-    ],
+    NgbModule.forRoot(),
+  ],
   declarations: [
     AppComponent,
     FullCalendarComponent,
@@ -73,7 +74,8 @@ registerLocaleData(localeFr, 'fr');
     CustomerSearchComponent,
     OrderListComponent,
     MessagesComponent,
-    CustomerEditComponent
+    CustomerEditComponent,
+    InlineEditorComponent
   ],
   providers: [
     { provide: CustomerService, useClass: HttpCustomerService },

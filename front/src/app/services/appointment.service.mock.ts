@@ -132,6 +132,10 @@ export class AppointmentServiceMock implements AppointmentService {
     return Observable.of(this.orders);
   }
 
+  public getOrdersByCustomer(customerId: number): Observable<Order[]> {
+    return Observable.of(this.orders);
+  }
+
   public searchOrders(page?: number, pageSize?: number, term?: string): Observable<SearchOrdersResult> {
     // TODO - mock filtering
     return Observable.of({

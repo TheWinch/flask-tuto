@@ -91,7 +91,17 @@ class Order(db.Model):
             return Order.query.order_by(Order.id, desc(Order.id)).slice(start, stop), count
 
     @staticmethod
-    def load_all_by_customer(patterns, page=None, limit=10):
+    def load_all_by_customer(customerId):
+        query = db.session.query(Order).select_from(Customer).\
+            join(Customer.appointments).\
+            join(Appointment.order).\
+            filter(Customer.id == customerId).\
+            distinct()
+        result = query.all()
+        return result, len(result)
+
+    @staticmethod
+    def load_all_matching(patterns, page=None, limit=10):
         query = db.session.query(Order).select_from(Customer).\
             join(Customer.appointments).\
             join(Appointment.order)

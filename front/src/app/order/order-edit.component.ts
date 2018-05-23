@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, ParamMap } from '@angular/router';
 import { FullCalendarComponent } from '../calendar/fullcalendar.component';
 
 import { Customer } from '../model/customer';
@@ -27,6 +27,7 @@ import { OrderModel, EventFlipResult } from '../model/order.model';
   templateUrl: './order-edit.component.html'
 })
 export class OrderEditComponent implements OnInit {
+  cameFrom: string;
   title: string;
   calendarOptions: Options;
   @ViewChild(FullCalendarComponent) ucCalendar: FullCalendarComponent;
@@ -79,7 +80,8 @@ export class OrderEditComponent implements OnInit {
   private buildEvents(allEvents: Event[]): any[] {
     return allEvents.map(e => {
       e = Object.assign(e, { title: e.capacity + ' restant(s)' });
-      OrderEditComponent.formatEvent(e, this.orderModel.containsEvent(e.id), this.orderModel.currentCustomerEvents.some(c => c.id === e.id));
+      OrderEditComponent.formatEvent(e, this.orderModel.containsEvent(e.id),
+            this.orderModel.currentCustomerEvents.some(c => c.id === e.id));
       return e;
     }, this);
   }
@@ -95,13 +97,13 @@ export class OrderEditComponent implements OnInit {
     if (this.orderModel.isNewOrder()) {
       this.appointmentService.createOrder(order).subscribe(data => {
         this.created.emit(data);
-        this.router.navigate(['orders'], { queryParams: { title: order.title } });
+        this.router.navigate([this.cameFrom], { queryParams: { title: order.title } });
       }, failure => {
         console.error('Could not create order: ' + failure);
       });
     } else {
       this.appointmentService.updateOrder(order).subscribe(data => {
-        this.router.navigate(['orders']);
+        this.router.navigate([this.cameFrom]);
       }, failure => {
         console.error('Could not update order: ' + failure);
       });
@@ -110,7 +112,7 @@ export class OrderEditComponent implements OnInit {
 
   abortOrder() {
     this.aborted.emit('');
-    this.router.navigate(['orders']);
+    this.router.navigate([this.cameFrom]);
   }
 
   onCustomerSelected(customer: Customer): void {
@@ -152,10 +154,20 @@ export class OrderEditComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.route.paramMap.pipe(flatMap(params => params.get('id') === 'new' ?
-      of(null) :
-      this.appointmentService.getOrder(params.get('id')))
-    ).subscribe(ord => {
+    this.route.queryParamMap.subscribe((params: ParamMap) => {
+      if (params.get('from') == null) {
+        this.cameFrom = 'orders';
+      } else {
+        this.cameFrom = params.get('from');
+      }
+    });
+    this.route.paramMap.pipe(flatMap((params: ParamMap) => {
+      if (params.get('id') === 'new') {
+        return of(null);
+      } else {
+        return this.appointmentService.getOrder(params.get('id'));
+      }
+    })).subscribe(ord => {
       const appointments = ord != null ? ord.appointments : [];
       const distinctSlots = new Set<number>(appointments.map(a => a.slotId));
       const customerObservable: Observable<Customer[]> = this.getCustomersForAppointments(appointments);

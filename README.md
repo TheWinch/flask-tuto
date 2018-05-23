@@ -85,3 +85,9 @@ This is standard Angular workflow. Go to the `front` folder and use angular as u
 $ cd front
 $ ng serve --aot
 ```
+
+## Packaging as a single executable
+
+https://elc.github.io/posts/executable-flask-pyinstaller/: how to package flask
+https://github.com/cdrx/docker-pyinstaller/blob/master/README.md: how to use pyinstaller from Docker
+https://pyinstaller.readthedocs.io/en/v3.3.1/operating-mode.html: pyinstaller manual 

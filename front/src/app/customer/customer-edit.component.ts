@@ -2,8 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { Customer } from '../model/customer';
 import { CustomerService } from '../services/customer.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { flatMap } from 'rxjs/operators';
+import { flatMap, map } from 'rxjs/operators';
 import { of } from 'rxjs/observable/of';
+import { SearchOrdersResult, AppointmentService } from '../services/appointment.service';
+import { Observable } from 'rxjs/Observable';
+import { Order } from '../model/order';
 
 @Component({
   selector: 'osc-customer-edit',
@@ -11,21 +14,21 @@ import { of } from 'rxjs/observable/of';
   styles: []
 })
 export class CustomerEditComponent implements OnInit {
-  // New customer creation fields
-  newCustomer: Customer = null;
+  orders$: Observable<Order[]>;
+  customer: Customer = null;
   loading = true;
 
   constructor(private customerService: CustomerService,
+              private appointmentService: AppointmentService,
               private router: Router,
               private route: ActivatedRoute) { }
 
   ngOnInit() {
-    this.route.paramMap.pipe(flatMap(params => params.get('id') === 'new' ?
-      of(new Customer()) :
-      this.customerService.getCustomer(+params.get('id')))
+    this.route.paramMap.pipe(flatMap(params => this.customerService.getCustomer(+params.get('id')))
     ).subscribe(customer => {
-      this.newCustomer = customer;
+      this.customer = customer;
       this.loading = false;
+      this.getPage();
     });
   }
 
@@ -34,19 +37,23 @@ export class CustomerEditComponent implements OnInit {
   }
 
   onSave() {
-    if (this.newCustomer.id == null) {
-      this.customerService.createCustomer(this.newCustomer).subscribe(res => {
-        this.router.navigate(['customers'], { queryParams: { title: this.newCustomer.firstName + ' ' + this.newCustomer.lastName } });
-      }, err => {
-        console.log('An error occured while creating the customer: ' + err);
-      });
-    } else {
-      this.customerService.updateCustomer(this.newCustomer).subscribe(data => {
-        this.router.navigate(['customers']);
-      }, failure => {
-        console.error('Could not update customer: ' + failure);
-      });
-    }
+    this.customerService.updateCustomer(this.customer).subscribe(data => {
+      this.router.navigate(['customers']);
+    }, failure => {
+      console.error('Could not update customer: ' + failure);
+    });
+  }
+
+  private getPage() {
+    this.orders$ = this.appointmentService.getOrdersByCustomer(this.customer.id);
+  }
+
+  createOrder(): void {
+    this.router.navigate(['orders', 'new'], { queryParams: { from: this.router.url } });
+  }
+
+  editOrder(order: Order): void {
+    this.router.navigate(['orders', order.id], { queryParams: { from: this.router.url } });
   }
 
 }
