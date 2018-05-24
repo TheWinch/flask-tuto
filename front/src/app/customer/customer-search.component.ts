@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, ElementRef, ViewChild, Input } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { Observable } from 'rxjs/Observable';
@@ -23,10 +23,15 @@ export class CustomerSearchComponent implements OnInit {
   newCustomer: Customer;
 
   // Emitted when the user selects or creates a customer
+  @Input() public excluded: number[] = [];
   @Output() public selected: EventEmitter<Customer> = new EventEmitter<Customer>();
 
   // Search list management
   searchResults$: Observable<Customer[]>;
+  searchPage = 1;
+  searchSize = 0;
+  pageSize = 1;
+  currentSearchTerm = '';
   private searchTerms = new Subject<string>();
   @ViewChild('searchBox') searchBox: ElementRef;
 
@@ -51,14 +56,43 @@ export class CustomerSearchComponent implements OnInit {
 
   onSelect(customer: Customer): void {
     this.selected.next(customer);
+    this.resetSearch();
+  }
+
+  search(term: string): void {
+    if (term) {
+      this.searchTerms.next(term);
+    } else {
+      this.resetSearch();
+    }
+  }
+
+  onPreviousPage(): void {
+    this.searchPage -= 1;
+    this.searchResults$ = this.customerService.searchCustomers(this.currentSearchTerm, this.searchPage, this.pageSize).pipe(
+      map((result: SearchResult) => result.customers)
+    );
+  }
+
+  onNextPage(): void {
+    this.searchPage += 1;
+    this.searchResults$ = this.customerService.searchCustomers(this.currentSearchTerm, this.searchPage, this.pageSize).pipe(
+      map((result: SearchResult) => result.customers)
+    );
+  }
+
+  isExcluded(customer): boolean {
+    return this.excluded.some(id => customer.id === id);
+  }
+
+  private resetSearch() {
+    this.searchSize = 0;
+    this.currentSearchTerm = '';
+    this.searchPage = 1;
     // This will reset the search list
     this.searchBox.nativeElement.value = '';
     // This resets the search results and hides the search list
     this.getCustomers();
-  }
-
-  search(term: string): void {
-    this.searchTerms.next(term);
   }
 
   private getCustomers(): void {
@@ -71,7 +105,12 @@ export class CustomerSearchComponent implements OnInit {
 
       // switch to new search observable each time the term changes
       switchMap((term: string) => {
-        return this.customerService.searchCustomers(term, 1, 4);
+        this.searchPage = 1;
+        this.currentSearchTerm = term;
+        return this.customerService.searchCustomers(term, this.searchPage, this.pageSize);
+      }),
+      tap((result: SearchResult) => {
+        this.searchSize = result.totalCount;
       }),
       map((result: SearchResult) => result.customers)
     );

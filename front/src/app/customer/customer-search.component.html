@@ -54,12 +54,18 @@
   </span>
 </div>
 <div class="list-group">
-  <a *ngFor="let customer of searchResults$ | async" class="list-group-item list-group-item-action " (click)="onSelect(customer)">
-    {{customer.firstName}} {{customer.lastName}}
-  </a>
-  <!--<a class="list-group-item list-group-item-action align-middle" role="button" (click)="showCustomerCreationModal(content)">
-    <span class="mr-2 text-success">
-      <i class="fa fa-plus-circle"></i>
-    </span>Créer un client...
-  </a>-->
+  <ng-container *ngFor="let customer of searchResults$ | async">
+    <a *ngIf="!isExcluded(customer)"
+       class="list-group-item list-group-item-action " (click)="onSelect(customer)">
+     {{customer.firstName}} {{customer.lastName}}
+   </a>
+   </ng-container>
+   <div *ngIf="pageSize < searchSize" class="list-group-item d-flex align-items-center">
+      <a *ngIf="searchPage > 1" class="w-50" (click)="onPreviousPage()">
+          Moins...
+      </a>
+      <a *ngIf="searchPage*pageSize < searchSize" class="w-50" (click)="onNextPage()">
+          Plus..
+      </a>
+       </div>
 </div>

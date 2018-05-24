@@ -51,6 +51,10 @@ export class OrderModel {
         ));
     }
 
+    get customerIds(): number[] {
+        return this._selections.map(selection => selection.customer.id);
+    }
+
     get selections(): CustomerSelection[] {
         return this._selections;
     }
