@@ -10,6 +10,8 @@ import {
 
 import { CustomerService, SearchResult } from '../services/customer.service';
 import { Customer } from '../model/customer';
+import { of } from 'rxjs/observable/of';
+import { PAGE_SIZE } from '../utils/pagination';
 
 @Component({
   selector: 'osc-customer-search',
@@ -51,7 +53,8 @@ export class CustomerSearchComponent implements OnInit {
     this.selected.next(customer);
     // This will reset the search list
     this.searchBox.nativeElement.value = '';
-    this.searchTerms.next('');
+    // This resets the search results and hides the search list
+    this.getCustomers();
   }
 
   search(term: string): void {
@@ -67,7 +70,9 @@ export class CustomerSearchComponent implements OnInit {
       distinctUntilChanged(),
 
       // switch to new search observable each time the term changes
-      switchMap((term: string) => this.customerService.searchCustomers(term)),
+      switchMap((term: string) => {
+        return this.customerService.searchCustomers(term, 1, 4);
+      }),
       map((result: SearchResult) => result.customers)
     );
   }

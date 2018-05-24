@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 
 import { Observable } from 'rxjs/Observable';
 import { concat } from 'rxjs/observable/concat';
@@ -13,6 +13,7 @@ import { CustomerService, SearchResult } from '../services/customer.service';
 import {MonoTypeOperatorFunction, OperatorFunction} from 'rxjs/interfaces';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Router } from '@angular/router';
+import { PAGE_SIZE } from '../utils/pagination';
 
 
 @Component({
@@ -23,11 +24,13 @@ import { Router } from '@angular/router';
 export class CustomerListComponent implements OnInit {
   customers$: Observable<Customer[]>;
   page = 1;
-  pageSize = 4;
+  pageSize = PAGE_SIZE;
   collectionSize = 0;
   searchTerm = '';
-  private searchTerms = new Subject<string>();
   newCustomer: Customer;
+  private searchTerms = new Subject<string>();
+  @ViewChild('deletionModal')
+  private deletionModal: ElementRef;
 
   constructor(private modalService: NgbModal, private customerService: CustomerService,
               private router: Router) { }
@@ -45,7 +48,6 @@ export class CustomerListComponent implements OnInit {
   showCustomerCreationModal(content) {
     this.modalService.open(content, {size: 'lg'}).result.then((result) => {
       this.customerService.createCustomer(this.newCustomer).subscribe(res => {
-        //this.resetCustomerTemplate();
         this.router.navigate(['customers', res.id]);
       }, err => {
         console.log('An error occured while creating the customer: ' + err);
@@ -56,25 +58,36 @@ export class CustomerListComponent implements OnInit {
 
 
   deleteCustomer(customer: Customer): void {
-  }
+    this.modalService.open(this.deletionModal, {size: 'sm'}).result.then((result) => {
+      if (result === 'confirm') {
+      console.log(result);
+          this.customerService.deleteCustomer(customer).subscribe(res => {
+          this.getCustomers();
+        }, err => {
+          console.error('An error occured while deleting the customer: ' + err);
+        });
+      }
+    }, (reason) => {
+  });
+}
 
   getCustomers(): void {
-     this.customers$ = concat(
-        this.customerService.searchCustomers(this.searchTerm, this.page, this.pageSize),
-        this.searchTerms.pipe(
-      // wait 300ms after each keystroke before considering the term
-      debounceTime(300),
+    this.customers$ = concat(
+      this.customerService.searchCustomers(this.searchTerm, this.page, this.pageSize),
+      this.searchTerms.pipe(
+        // wait 300ms after each keystroke before considering the term
+        debounceTime(300),
 
-      // ignore new term if same as previous term
-      distinctUntilChanged(),
+        // ignore new term if same as previous term
+        distinctUntilChanged(),
 
-      // switch to new search observable each time the term changes
-      switchMap((term: string) => {
-        this.page = 1;
-        this.searchTerm = term.trim();
-        return this.customerService.searchCustomers(this.searchTerm, this.page, this.pageSize);
-      })
-    )).pipe(
+        // switch to new search observable each time the term changes
+        switchMap((term: string) => {
+          this.page = 1;
+          this.searchTerm = term.trim();
+          return this.customerService.searchCustomers(this.searchTerm, this.page, this.pageSize);
+        }))
+    ).pipe(
       tap((res: SearchResult) => this.collectionSize = res.totalCount),
       map((res: SearchResult) => res.customers)
     );

@@ -77,4 +77,9 @@ export class CustomerServiceMock implements CustomerService {
     }
     return of({totalCount: result.length, customers: result});
   }
+
+  deleteCustomer(customer: Customer): Observable<Object> {
+      this.repo = this.repo.filter(aCustomer => aCustomer.id !== customer.id);
+      return of(null);
+  }
 }

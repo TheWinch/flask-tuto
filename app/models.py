@@ -25,12 +25,17 @@ class Customer(db.Model):
     @staticmethod
     def load_all(page=None, limit=10):
         if page is None:
-            all_customers = Customer.query.order_by(Customer.id, asc(Customer.id)).all()
+            all_customers = Customer.query.\
+                order_by(asc(Customer.lastname)).order_by(asc(Customer.firstname)).\
+                all()
             return all_customers, len(all_customers)
         else:
             start, stop = (page-1)*limit, page*limit
             customers_count = db.session.query(func.count(Customer.id)).scalar()
-            return Customer.query.order_by(Customer.id, asc(Customer.id)).slice(start, stop).all(), customers_count
+            result = Customer.query. \
+                order_by(asc(Customer.lastname)).order_by(asc(Customer.firstname)).\
+                slice(start, stop).all()
+            return result, customers_count
 
     @staticmethod
     def load(cid):
@@ -46,7 +51,8 @@ class Customer(db.Model):
                     Customer.lastname.like('%' + pattern + '%'),
                     Customer.email.like('%' + pattern + '%'))
             )
-        query = query.filter(and_(*ors))
+        query = query.filter(and_(*ors)).order_by(asc(Customer.lastname)).\
+            order_by(asc(Customer.firstname))
         if page is None:
             result = query.all()
             return result, len(result)
@@ -83,22 +89,38 @@ class Order(db.Model):
     @staticmethod
     def load_all(page=None, limit=10):
         if page is None:
-            all_orders = Order.query.order_by(Order.id, desc(Order.id)).all()
+            all_orders = Order.query.order_by(desc(Order.id)).all()
             return all_orders, len(all_orders)
         else:
             start, stop = (page-1)*limit, page*limit
             count = db.session.query(func.count(Order.id)).scalar()
-            return Order.query.order_by(Order.id, desc(Order.id)).slice(start, stop), count
+            return Order.query.order_by(desc(Order.id)).slice(start, stop), count
 
     @staticmethod
-    def load_all_by_customer(customerId):
-        query = db.session.query(Order).select_from(Customer).\
-            join(Customer.appointments).\
-            join(Appointment.order).\
-            filter(Customer.id == customerId).\
+    def load_all_by_customer(customer_id):
+        query = db.session.query(Order).select_from(Customer). \
+            join(Customer.appointments). \
+            join(Appointment.order). \
+            filter(Customer.id == customer_id). \
+            order_by(desc(Order.id)).\
             distinct()
         result = query.all()
         return result, len(result)
+
+    @staticmethod
+    def load_by_contact(customer_id):
+        query = db.session.query(Order).\
+            filter(Order.payer_id == customer_id).\
+            order_by(desc(Order.id))
+        return query.all()
+
+    @staticmethod
+    def delete_by_customer(customer_id):
+        db.session.query(Order).select_from(Customer).\
+            join(Customer.appointments).\
+            join(Appointment.order).\
+            filter(Customer.id == customer_id).\
+            delete()
 
     @staticmethod
     def load_all_matching(patterns, page=None, limit=10):
@@ -158,6 +180,10 @@ class Appointment(db.Model):
     @staticmethod
     def load(oid):
         return Appointment.query.get(oid)
+
+    @staticmethod
+    def delete_by_customer(customer_id):
+        Appointment.query.filter(Appointment.customer_id == customer_id).delete()
 
     def create(self):
         db.session.add(self)

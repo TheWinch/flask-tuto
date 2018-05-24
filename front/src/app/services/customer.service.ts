@@ -22,6 +22,7 @@ export abstract class CustomerService {
   abstract getCustomer(id: number): Observable<Customer>;
   abstract searchCustomers(term: string, page?: number, pageSize?: number): Observable<SearchResult>;
   abstract createCustomer(customer: Customer): Observable<Customer>;
+  abstract deleteCustomer(customer: Customer): Observable<Object>;
 }
 
 @Injectable()
@@ -60,6 +61,10 @@ export class HttpCustomerService implements CustomerService {
     return this.http.get<SearchResult>(url).pipe(
       catchError(this.handleError<SearchResult>('searchCustomers', null))
     );
+  }
+
+  deleteCustomer(customer: Customer): Observable<Object> {
+    return this.http.delete(this.url + customer.id);
   }
 
   private handleError<T>(operation = 'operation', result ?: T) {

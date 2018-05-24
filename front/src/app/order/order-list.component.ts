@@ -12,6 +12,7 @@ import {
   debounceTime, distinctUntilChanged, switchMap
 } from 'rxjs/operators';
 import { Router, ActivatedRoute } from '@angular/router';
+import { PAGE_SIZE } from '../utils/pagination';
 
 @Component({
   selector: 'osc-order-list',
@@ -23,7 +24,7 @@ export class OrderListComponent implements OnInit {
   orders$: Observable<Order[]>;
   collectionSize = 0;
   page = 1;
-  pageSize = 4;
+  pageSize = PAGE_SIZE;
   searchTerm = '';
   @ViewChild(MessagesComponent) messageList: MessagesComponent;
 
@@ -60,8 +61,6 @@ export class OrderListComponent implements OnInit {
         }
       }
     );
-    this.pageSize = 4;
-    this.page = 1;
     this.getPage();
   }
 

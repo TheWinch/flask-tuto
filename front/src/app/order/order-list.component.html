@@ -36,6 +36,7 @@
     </table>
   </div><div class="w-100" ></div>
   <ngb-pagination 
+      *ngIf="pageSize < collectionSize" 
       [directionLinks]="false" 
       [collectionSize]="collectionSize"
       [pageSize]="pageSize"

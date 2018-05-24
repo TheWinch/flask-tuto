@@ -1,4 +1,19 @@
 <osc-messages></osc-messages>
+<ng-template #deletionModal let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h5 class="modal-title">Supprimer un client</h5>
+    <button type="button" class="close" aria-label="Close" (click)="d('abort')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <p>Etes-vous sûr? Cette opération supprimera définitivement ce client et toutes les commandes associées!</p>
+  </div>
+  <div class="modal-footer btn-group d-flex">
+      <button type="button" class="btn btn-danger w-100" (click)="c('cancel')">Annuler</button>
+      <button type="button" class="btn btn-primary w-100" (click)="c('confirm')">Confirmer</button>
+  </div>
+</ng-template>
 <ng-template #customerCreationModal let-c="close" let-d="dismiss">
     <div class="modal-header">
       <h5 class="modal-title">Créer un client</h5>
@@ -80,5 +95,5 @@
       </tbody>
     </table>
   </div><div class="w-100" ></div>
-  <ngb-pagination [directionLinks]="false" [collectionSize]="collectionSize" [pageSize]="4" [(page)]="page" (pageChange)="onPageChange($event)"></ngb-pagination>
+  <ngb-pagination *ngIf="pageSize < collectionSize" [directionLinks]="false" [collectionSize]="collectionSize" [pageSize]="pageSize" [(page)]="page" (pageChange)="onPageChange($event)"></ngb-pagination>
 </div>

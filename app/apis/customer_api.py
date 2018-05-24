@@ -6,7 +6,7 @@ from flask import request, url_for
 from flask_restplus import Resource, fields, reqparse, abort
 from sqlalchemy.exc import IntegrityError
 
-from app import models
+from app import models, db
 from app.apis import api, UrlWithUid, make_paged_search_parser
 
 ns = api.namespace('customers', description='Customers operations')
@@ -92,7 +92,16 @@ class Customer(Resource):
         loaded = models.Customer.load(uid)
         if loaded is None:
             return '', 404
-        loaded.delete()
+        models.Appointment.delete_by_customer(uid)
+        orders = models.Order.load_by_contact(uid)
+        for order in orders:
+            if len(order.appointments) == 0:
+                order.delete()
+            else:
+                if order.payer_id == uid:
+                    order.payer_id = order.appointments[0].customer_id
+        db.session.delete(loaded)
+        db.session.commit()
         return '', 204
 
     @ns.response(200, 'Customer updated')
@@ -104,8 +113,8 @@ class Customer(Resource):
             return abort(404)
         data = request.json
         customer.firstname = data['firstName']
-        customer.lastname=data['lastName']
-        customer.email=data['email']
-        customer.phone=data['phone']
+        customer.lastname = data['lastName']
+        customer.email = data['email']
+        customer.phone = data['phone']
         customer.update()
         return customer
