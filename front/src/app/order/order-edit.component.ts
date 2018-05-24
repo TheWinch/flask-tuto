@@ -79,6 +79,7 @@ export class OrderEditComponent implements OnInit {
    */
   private buildEvents(allEvents: Event[]): any[] {
     return allEvents.map(e => {
+      e.capacity = e.capacity - e.used; // make capacity the remaining capacity
       e = Object.assign(e, { title: e.capacity + ' restant(s)' });
       OrderEditComponent.formatEvent(e, this.orderModel.containsEvent(e.id),
             this.orderModel.currentCustomerEvents.some(c => c.id === e.id));

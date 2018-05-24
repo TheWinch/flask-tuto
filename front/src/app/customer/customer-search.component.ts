@@ -30,7 +30,7 @@ export class CustomerSearchComponent implements OnInit {
   searchResults$: Observable<Customer[]>;
   searchPage = 1;
   searchSize = 0;
-  pageSize = 1;
+  pageSize = 5;
   currentSearchTerm = '';
   private searchTerms = new Subject<string>();
   @ViewChild('searchBox') searchBox: ElementRef;
