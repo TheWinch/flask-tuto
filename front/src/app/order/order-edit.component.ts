@@ -39,13 +39,15 @@ export class OrderEditComponent implements OnInit {
   private static formatEvent(event: Event, isSelectedBySomeone: boolean, isForCurrentCustomer: boolean): void {
     let backgroundColor = event.capacity > 0 ? '' : 'grey';
     if (isForCurrentCustomer) {
+      backgroundColor = '#5bc0de';
+    } else if (event.capacity === 0) {
+      backgroundColor = 'grey';
+    } else if (isSelectedBySomeone) {
       backgroundColor = '#20c997';
     }
-    const borderColor = isSelectedBySomeone ? 'red' : '';
 
     Object.assign(event, {
       backgroundColor: backgroundColor,
-      borderColor: borderColor
     });
   }
 

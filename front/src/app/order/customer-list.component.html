@@ -2,7 +2,9 @@
      *ngFor="let choice of customerChoices"
      [class.bd-callout-primary]="choice.customer === currentSelection"
      (click)="onSelect(choice.customer)">
-  <h4 class="d-flex justify-content-between align-items-center">{{ choice.customer.firstName }} {{ choice.customer.lastName }}
+  <h4 class="d-flex justify-content-between align-items-center">
+    <span 
+      [class.unselected]="choice.customer !== currentSelection">{{ choice.customer.firstName }} {{ choice.customer.lastName }}</span>
     <small>{{ choice.choices.length }} cours</small>
     <a (click)="onRemove(choice.customer)" class="text-danger" style="cursor: pointer"><i class="fa fa-minus-circle"></i></a>
   </h4>
