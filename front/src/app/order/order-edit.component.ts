@@ -51,7 +51,17 @@ export class OrderEditComponent implements OnInit {
     });
   }
 
-  private makeCalendarOptions(data: any[]): any {
+  private static enrichEvent(event: Event, orderModel: OrderModel) {
+    event.capacity = event.capacity - event.used; // make capacity the remaining capacity
+    event = Object.assign(event, { title: event.capacity + ' restant(s)' });
+    OrderEditComponent.formatEvent(event, orderModel.containsEvent(event.id),
+          orderModel.currentCustomerEvents.some(c => c.id === event.id));
+}
+
+  private makeCalendarOptions(): any {
+    // solve visibility issues
+    const eventService = this.eventService;
+    const orderModel = this.orderModel;
     return {
       height: 688,
       defaultView: 'agendaWeek',
@@ -72,21 +82,14 @@ export class OrderEditComponent implements OnInit {
         end: '19:00',
       },
       allDaySlot: false,
-      events: data
+      defaultDate: orderModel.minDate,
+      events: function (start, end, timezone, callback) {
+        eventService.getEventsByDate(start, end).subscribe(events => {
+          events.forEach(e => OrderEditComponent.enrichEvent(e, orderModel));
+          callback(events);
+        });
+      }
     };
-  }
-
-  /**
-   * Enrich the events in the calendar with their color and title
-   */
-  private buildEvents(allEvents: Event[]): any[] {
-    return allEvents.map(e => {
-      e.capacity = e.capacity - e.used; // make capacity the remaining capacity
-      e = Object.assign(e, { title: e.capacity + ' restant(s)' });
-      OrderEditComponent.formatEvent(e, this.orderModel.containsEvent(e.id),
-            this.orderModel.currentCustomerEvents.some(c => c.id === e.id));
-      return e;
-    }, this);
   }
 
   constructor(private eventService: EventService,
@@ -174,14 +177,11 @@ export class OrderEditComponent implements OnInit {
       const appointments = ord != null ? ord.appointments : [];
       const distinctSlots = new Set<number>(appointments.map(a => a.slotId));
       const customerObservable: Observable<Customer[]> = this.getCustomersForAppointments(appointments);
-      const eventsObservable: Observable<Event[]> = this.eventService.getEvents(); // TODO - restrict to this week and after
 
-      forkJoin(customerObservable, eventsObservable)
-        .subscribe(data => {
-          this.orderModel = new OrderModel(ord, data[0]);
-          const coloredEvents = this.buildEvents(data[1]);
-          this.calendarOptions = this.makeCalendarOptions(coloredEvents);
-        });
+      customerObservable.subscribe(customers => {
+        this.orderModel = new OrderModel(ord, customers);
+        this.calendarOptions = this.makeCalendarOptions();
+      });
     }
     );
   }

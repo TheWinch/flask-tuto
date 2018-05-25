@@ -71,6 +71,20 @@ export class OrderModel {
         return this._contactId;
     }
 
+    get minDate(): Date {
+        let dates: Date[] = this._selections.reduce((previous, selection, index, collecter) =>
+            selection.sorted_choices.map(choice => {
+                if (choice.start instanceof Date) {
+                    return choice.start;
+                } else {
+                    return new Date(choice.start);
+                }
+            })
+        , []);
+        dates = dates.sort((a, b) => a < b ? -1 : 1);
+        return dates.length > 0 ? dates[0] : new Date();
+    }
+
     buildOrder(): Order {
         const self = this;
         const selectionToAppointments = function (appointments: Appointment[], selection: CustomerSelection): Appointment[] {
