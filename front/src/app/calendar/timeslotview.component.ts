@@ -1,11 +1,13 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {DatePipe} from '@angular/common';
+import * as moment from 'moment';
 
 import {FullCalendarComponent} from './fullcalendar.component';
 import {MessagesComponent} from '../messages/messages.component';
 
 import {Options} from 'fullcalendar';
 import {EventService} from '../services/event.service';
+import {Event} from '../model/event';
 
 @Component({
   selector: 'osc-timeslots',
@@ -23,33 +25,57 @@ export class TimeSlotViewComponent implements OnInit {
   calendarOptions: Options;
   @ViewChild(FullCalendarComponent) ucCalendar: FullCalendarComponent;
   @ViewChild(MessagesComponent) messageList: MessagesComponent;
+  private readonly frozenNow = moment(new Date());
+
+  private static colorEvent(event: Event, now: moment.Moment): string {
+    if (event.used === event.capacity || now.isAfter(event.end)) {
+      return 'grey';
+    } else if (event.used === event.capacity - 1) {
+      return 'red';
+    } else if (event.used > event.capacity / 2) {
+      return 'orange';
+    } else  {
+      return 'green';
+    }
+  }
 
   updateEvent(model: any): void {
     const ucCalendar = this.ucCalendar;
     this.ucCalendar.fullCalendar('unselect');
-    this.eventService.updateEvent(model.event.id, model.event.start, model.event.end).subscribe(data => {
-      ucCalendar.fullCalendar('refetchEvents');
-    }, error => {
-      this.messageList.error('Echec de la mise à jour du créneau: ' + error);
-    });
+    if (this.frozenNow.isAfter(model.event.end)) {
+      this.eventService.updateEvent(model.event.id, model.event.start, model.event.end).subscribe(data => {
+        ucCalendar.fullCalendar('refetchEvents');
+      }, error => {
+        this.messageList.error('Echec de la mise à jour du créneau: ' + error);
+      });
+    } else {
+      model.revertFunc();
+    }
   }
 
   onEventDefined(model: any) {
     const ucCalendar = this.ucCalendar;
     ucCalendar.fullCalendar('unselect');
-    const datePipe = new DatePipe('fr');
-    this.eventService.createEvents([Object.assign({}, model.event, {capacity: 8})])
-      .subscribe(events => {
-        const createDate = datePipe.transform(events[0].start, 'dd/MM/yyyy');
-        const startTime = datePipe.transform(events[0].start, 'hh:mm');
-        const endTime = datePipe.transform(events[0].end, 'hh:mm');
-        this.messageList.info('Un créneau a été créé le ' + createDate + ' de ' + startTime + ' à ' + endTime);
-        ucCalendar.fullCalendar('refetchEvents'); // this is a bit violent, we could just update whatever events have been collected
-      });
+    if (model.event.end > this.frozenNow) {
+      const datePipe = new DatePipe('fr');
+      this.eventService.createEvents([Object.assign({}, model.event, {capacity: 8})])
+        .subscribe(events => {
+          const createDate = datePipe.transform(events[0].start, 'dd/MM/yyyy');
+          const startTime = datePipe.transform(events[0].start, 'hh:mm');
+          const endTime = datePipe.transform(events[0].end, 'hh:mm');
+          this.messageList.info('Un créneau a été créé le ' + createDate + ' de ' + startTime + ' à ' + endTime);
+          ucCalendar.fullCalendar('refetchEvents'); // this is a bit violent, we could just update whatever events have been collected
+        });
+    } else {
+      if (model.revertFunc != null) {
+        model.revertFunc();
+      }
+    }
   }
 
   ngOnInit() {
     const eventService = this.eventService;
+    const now = this.frozenNow;
     this.calendarOptions = {
       height: 688,
       defaultView: 'agendaWeek',
@@ -79,8 +105,8 @@ export class TimeSlotViewComponent implements OnInit {
             // the order view)
             Object.assign(e, {
               borderColor: '',
-              backgroundColor: '',
-              title: e.used + ' client' + (e.used !== 1 ? 's' : '')
+              backgroundColor: TimeSlotViewComponent.colorEvent(e, now),
+              title: e.used + '/' + e.capacity + ' client' + (e.used !== 1 ? 's' : '')
           });
           });
           callback(data);

@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router, ParamMap } from '@angular/router';
 import { FullCalendarComponent } from '../calendar/fullcalendar.component';
@@ -30,20 +31,23 @@ export class OrderEditComponent implements OnInit {
   cameFrom: string;
   title: string;
   calendarOptions: Options;
-  @ViewChild(FullCalendarComponent) ucCalendar: FullCalendarComponent;
-
+  private readonly frozenNow = moment(new Date());
+  @ViewChild(FullCalendarComponent)
+  ucCalendar: FullCalendarComponent;
   @Output() created = new EventEmitter();
   @Output() aborted = new EventEmitter();
   orderModel: OrderModel = null;
 
-  private static formatEvent(event: Event, isSelectedBySomeone: boolean, isForCurrentCustomer: boolean): void {
-    let backgroundColor = event.capacity > 0 ? '' : 'grey';
-    if (isForCurrentCustomer) {
-      backgroundColor = '#5bc0de';
+  private formatEvent(event: Event, isSelectedBySomeone: boolean, isForCurrentCustomer: boolean): void {
+    let backgroundColor = '';
+    if (event.end.isBefore(this.frozenNow)) {
+      backgroundColor = isForCurrentCustomer ? 'lightgrey' : 'grey';
+    } else if (isForCurrentCustomer) {
+      backgroundColor = '#20c997';
     } else if (event.capacity === 0) {
       backgroundColor = 'grey';
     } else if (isSelectedBySomeone) {
-      backgroundColor = '#20c997';
+      backgroundColor = '#5bc0de';
     }
 
     Object.assign(event, {
@@ -51,17 +55,20 @@ export class OrderEditComponent implements OnInit {
     });
   }
 
-  private static enrichEvent(event: Event, orderModel: OrderModel) {
+  private enrichEvent(event: Event) {
     event.capacity = event.capacity - event.used; // make capacity the remaining capacity
+    event.start = moment(event.start);
+    event.end = moment(event.end);
     event = Object.assign(event, { title: event.capacity + ' restant(s)' });
-    OrderEditComponent.formatEvent(event, orderModel.containsEvent(event.id),
-          orderModel.currentCustomerEvents.some(c => c.id === event.id));
+    this.formatEvent(event, this.orderModel.containsEvent(event.id),
+                     this.orderModel.currentCustomerEvents.some(c => c.id === event.id));
 }
 
   private makeCalendarOptions(): any {
     // solve visibility issues
     const eventService = this.eventService;
     const orderModel = this.orderModel;
+    const capturedThis = this;
     return {
       height: 688,
       defaultView: 'agendaWeek',
@@ -81,11 +88,17 @@ export class OrderEditComponent implements OnInit {
         start: '8:00',
         end: '19:00',
       },
+      columnHeaderFormat: 'ddd D/M',
+      views: {
+        agendaWeek: {
+          columnHeaderFormat: 'ddd D/M'
+        }
+      },
       allDaySlot: false,
       defaultDate: orderModel.minDate,
       events: function (start, end, timezone, callback) {
         eventService.getEventsByDate(start, end).subscribe(events => {
-          events.forEach(e => OrderEditComponent.enrichEvent(e, orderModel));
+          events.forEach(e => capturedThis.enrichEvent(e));
           callback(events);
         });
       }
@@ -129,9 +142,9 @@ export class OrderEditComponent implements OnInit {
     const removedEventIds = this.orderModel.removeCustomer(customer);
     removedEventIds.forEach(id => {
       const event = this.ucCalendar.fullCalendar('clientEvents', id)[0];
-      OrderEditComponent.formatEvent(event, this.orderModel.containsEvent(id),
-                                 this.orderModel.currentCustomerEvents.some(c => c.id === event.id));
       event.capacity = event.capacity + 1;
+      this.formatEvent(event, this.orderModel.containsEvent(id),
+                       this.orderModel.currentCustomerEvents.some(c => c.id === event.id));
       event.title = event.capacity + ' restant(s)';
       this.ucCalendar.updateEvent(event);
     });
@@ -144,16 +157,19 @@ export class OrderEditComponent implements OnInit {
 
   onEventSelected(model: any): void {
     const event = model.event;
+    if (event.end.isBefore(this.frozenNow)) {
+      return;
+    }
     const result = this.orderModel.flipEvent(event);
     if (result === EventFlipResult.NONE) {
       return;
     }
     if (result === EventFlipResult.SELECT) {
       event.capacity = event.capacity - 1;
-      OrderEditComponent.formatEvent(event, true, true);
+      this.formatEvent(event, true, true);
     } else {
       event.capacity = event.capacity + 1;
-      OrderEditComponent.formatEvent(event, this.orderModel.containsEvent(event.id), false);
+      this.formatEvent(event, this.orderModel.containsEvent(event.id), false);
     }
     event.title = event.capacity + ' restant(s)';
     this.ucCalendar.updateEvent(event);
@@ -199,13 +215,17 @@ export class OrderEditComponent implements OnInit {
 
     eventUpdates.unselectedEventIds.forEach(id => {
       const event = this.ucCalendar.fullCalendar('clientEvents', id)[0];
-      OrderEditComponent.formatEvent(event, this.orderModel.containsEvent(id), false);
-      this.ucCalendar.updateEvent(event);
+      if (event !== undefined) { // could be out of view
+        this.formatEvent(event, this.orderModel.containsEvent(id), false);
+        this.ucCalendar.updateEvent(event);
+      }
     });
     eventUpdates.selectedEventIds.forEach(id => {
       const event = this.ucCalendar.fullCalendar('clientEvents', id)[0];
-      OrderEditComponent.formatEvent(event, true, true);
-      this.ucCalendar.updateEvent(event);
+      if (event !== undefined) { // could be out of view
+        this.formatEvent(event, true, true);
+        this.ucCalendar.updateEvent(event);
+      }
     });
   }
 }

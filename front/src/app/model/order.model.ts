@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import { Customer } from './customer';
 import { CustomerSelection, EventChoice } from './customer-choices';
 import { Event } from './event';
@@ -71,18 +72,14 @@ export class OrderModel {
         return this._contactId;
     }
 
-    get minDate(): Date {
-        let dates: Date[] = this._selections.reduce((previous, selection, index, collecter) =>
+    get minDate(): moment.Moment {
+        let dates: moment.Moment[] = this._selections.reduce((previous, selection, index, collecter) =>
             selection.sorted_choices.map(choice => {
-                if (choice.start instanceof Date) {
-                    return choice.start;
-                } else {
-                    return new Date(choice.start);
-                }
+                return choice.start;
             })
         , []);
-        dates = dates.sort((a, b) => a < b ? -1 : 1);
-        return dates.length > 0 ? dates[0] : new Date();
+        dates = dates.sort((a, b) => a.isBefore(b) ? -1 : 1);
+        return dates.length > 0 ? dates[0] : moment(new Date());
     }
 
     buildOrder(): Order {

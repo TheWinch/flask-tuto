@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import { Customer } from './customer';
 import { ImmutableArrays } from './immutable-arrays';
 
@@ -5,11 +6,11 @@ import { ImmutableArrays } from './immutable-arrays';
  * A single choice of date by a customer.
  */
 export class EventChoice {
-  start: string | Date;
+  start: moment.Moment;
   id: number;
 
-  constructor(id: number, start: string | Date) {
-    this.start = start;
+  constructor(id: number, start: string | Date | moment.Moment) {
+    this.start = moment(start);
     this.id = id;
   }
 }
@@ -25,7 +26,7 @@ export class CustomerSelection {
    * Choices sorted by ascending date.
    */
   get sorted_choices(): EventChoice[] {
-    return this._choices.sort((a, b) => a.start < b.start ? -1 : 1);
+    return this._choices.sort((a, b) => a.start.isBefore(b.start) ? -1 : 1);
   }
 
   get choices(): EventChoice[] {

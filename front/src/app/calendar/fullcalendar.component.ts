@@ -11,6 +11,7 @@ export class ButtonClickModel {
 export class UpdateEventModel {
   event: any;
   duration: any;
+  revertFunc?: any;
 }
 
 @Component({
@@ -75,16 +76,16 @@ export class FullCalendarComponent implements OnInit, AfterViewInit, AfterConten
   }
   updaterOptions() {
     const elem = document.getElementsByTagName('osc-fullcalendar');
-    this.options.eventDrop = function (event, duration) {
-      const detail: UpdateEventModel = { event: event, duration: duration };
+    this.options.eventDrop = function (event, duration, revertFunc) {
+      const detail: UpdateEventModel = { event: event, duration: duration, revertFunc: revertFunc };
       const widgetEvent = new CustomEvent('eventDrop', {
         bubbles: true,
         detail: detail
       });
       elem[0].dispatchEvent(widgetEvent);
     };
-    this.options.eventResize = function (event, duration) {
-      const detail: UpdateEventModel = { event: event, duration: duration };
+    this.options.eventResize = function (event, duration, revertFunc) {
+      const detail: UpdateEventModel = { event: event, duration: duration, revertFunc: revertFunc };
       const widgetEvent = new CustomEvent('eventResize', {
         bubbles: true,
         detail: detail
