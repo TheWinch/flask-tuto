@@ -6,7 +6,7 @@ import { CustomerSelection } from '../model/customer-choices';
 @Component({
   selector: 'osc-customer-list',
   templateUrl: './customer-list.component.html',
-  styleUrls: ['./customer-list.component.css'],
+  styleUrls: ['./customer-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class OrderCustomerListComponent {

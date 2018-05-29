@@ -1,7 +1,6 @@
 import {Event} from '../model/event';
 
-import {Observable} from 'rxjs/Observable';
-import 'rxjs/add/observable/of';
+import {Observable, of} from 'rxjs';
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {catchError} from 'rxjs/operators';
@@ -46,7 +45,7 @@ export class HttpEventService implements EventService {
   private handleError<T>(operation = 'operation', result ?: T) {
     return (error: any): Observable<T> => {
       console.error(`${operation} failed`, error);
-      return Observable.of(result as T);
+      return of(result as T);
     };
   }
 }

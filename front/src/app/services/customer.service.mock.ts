@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { Customer } from '../model/customer';
 import { CustomerService, SearchResult } from './customer.service';
 
-import { Observable } from 'rxjs/Observable';
-import { of } from 'rxjs/observable/of';
+import { Observable, of } from 'rxjs';
 
 @Injectable()
 export class CustomerServiceMock implements CustomerService {

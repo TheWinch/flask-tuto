@@ -2,11 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { Customer } from '../model/customer';
 import { CustomerService } from '../services/customer.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { flatMap, map } from 'rxjs/operators';
-import { of } from 'rxjs/observable/of';
 import { SearchOrdersResult, AppointmentService } from '../services/appointment.service';
-import { Observable } from 'rxjs/Observable';
 import { Order } from '../model/order';
+import { Observable } from 'rxjs';
+import { flatMap } from 'rxjs/operators';
 
 @Component({
   selector: 'osc-customer-edit',

@@ -1,4 +1,4 @@
-import { ReplaySubject } from 'rxjs/ReplaySubject';
+import { ReplaySubject } from 'rxjs';
 import { ParamMap, Params, convertToParamMap } from '@angular/router';
 
 /**

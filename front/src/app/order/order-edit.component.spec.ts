@@ -1,4 +1,4 @@
-import {ReplaySubject} from 'rxjs/ReplaySubject';
+import {ReplaySubject, of} from 'rxjs';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { OrderEditComponent } from './order-edit.component';
@@ -9,7 +9,6 @@ import { FormsModule } from '@angular/forms';
 import { EventService } from '../services/event.service';
 import { AppointmentService } from '../services/appointment.service';
 import { CustomerService } from '../services/customer.service';
-import { of } from 'rxjs/observable/of';
 import { Router, ActivatedRouteSnapshot, ParamMap, Params, convertToParamMap, ActivatedRoute } from '@angular/router';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRouteStub } from '../test-utils/activated-route-stub';

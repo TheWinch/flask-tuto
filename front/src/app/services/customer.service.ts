@@ -2,10 +2,9 @@ import {Injectable} from '@angular/core';
 import {Customer} from '../model/customer';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 
-import {Observable} from 'rxjs/Observable';
-import {of} from 'rxjs/observable/of';
-import {catchError} from 'rxjs/operators';
+import {Observable, of} from 'rxjs';
 import { buildSearchUrl } from './service-utils';
+import { catchError } from 'rxjs/operators';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })

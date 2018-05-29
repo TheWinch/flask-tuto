@@ -1,8 +1,7 @@
 import { Component, OnInit, Output, EventEmitter, ElementRef, ViewChild, Input } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
-import { Observable } from 'rxjs/Observable';
-import { Subject } from 'rxjs/Subject';
+import { Observable, Subject } from 'rxjs';
 
 import {
   debounceTime, distinctUntilChanged, switchMap, tap, map
@@ -10,7 +9,6 @@ import {
 
 import { CustomerService, SearchResult } from '../services/customer.service';
 import { Customer } from '../model/customer';
-import { of } from 'rxjs/observable/of';
 import { PAGE_SIZE } from '../utils/pagination';
 
 @Component({

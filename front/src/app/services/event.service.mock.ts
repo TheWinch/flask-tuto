@@ -1,8 +1,7 @@
 import {Injectable} from '@angular/core';
 import * as moment from 'moment';
 
-import {Observable} from 'rxjs/Observable';
-import {of} from 'rxjs/observable/of';
+import {Observable, of} from 'rxjs';
 
 import {EventService} from './event.service';
 import {Event} from '../model/event';
@@ -30,7 +29,7 @@ export class EventServiceMock implements EventService {
     const event: Event = this.repo.filter(e => e.id === id)[0];
     event.start = moment(start);
     event.end = moment(end);
-    return Observable.of(event);
+    return of(event);
   }
 
   public createEvents(model: Event[]): Observable<Event[]> {
@@ -60,96 +59,112 @@ export class EventServiceMock implements EventService {
     return [
       {
         id: 1,
+        title: '',
         start: moment('' + yearMonth + (day - 2) + 'T08:00:00'),
         end: moment('' + yearMonth + (day - 2) + 'T10:00:00'),
         capacity: 6
       },
       {
         id: 2,
+        title: '',
         start: moment('' + yearMonth + (day - 2) + 'T10:30:00'),
         end: moment('' + yearMonth + (day - 2) + 'T12:30:00'),
         capacity: 8
       },
       {
         id: 3,
+        title: '',
         start: moment('' + yearMonth + (day - 2) + 'T14:00:00'),
         end: moment('' + yearMonth + (day - 2) + 'T16:00:00'),
         capacity: 8
       },
       {
         id: 4,
+        title: '',
         start: moment('' + yearMonth + (day - 2) + 'T16:30:00'),
         end: moment('' + yearMonth + (day - 2) + 'T18:30:00'),
         capacity: 8
       },
       {
         id: 5,
+        title: '',
         start: moment('' + yearMonth + (day - 1) + 'T08:00:00'),
         end: moment('' + yearMonth + (day - 1) + 'T10:00:00'),
         capacity: 5
       },
       {
         id: 6,
+        title: '',
         start: moment('' + yearMonth + (day - 1) + 'T10:30:00'),
         end: moment('' + yearMonth + (day - 1) + 'T12:30:00'),
         capacity: 8
       },
       {
         id: 7,
+        title: '',
         start: moment('' + yearMonth + (day - 1) + 'T14:00:00'),
         end: moment('' + yearMonth + (day - 1) + 'T16:00:00'),
         capacity: 8
       },
       {
         id: 8,
+        title: '',
         start: moment('' + yearMonth + (day - 1) + 'T16:30:00'),
         end: moment('' + yearMonth + (day - 1) + 'T18:30:00'),
         capacity: 8
       },
       {
         id: 9,
+        title: '',
         start: moment('' + yearMonth + (day) + 'T08:00:00'),
         end: moment('' + yearMonth + (day) + 'T10:00:00'),
         capacity: 2
       },
       {
         id: 10,
+        title: '',
         start: moment('' + yearMonth + (day) + 'T10:30:00'),
         end: moment('' + yearMonth + (day) + 'T12:30:00'),
         capacity: 0
       },
       {
         id: 11,
+        title: '',
         start: moment('' + yearMonth + (day) + 'T14:00:00'),
         end: moment('' + yearMonth + (day) + 'T16:00:00'),
         capacity: 2
       },
       {
         id: 12,
+        title: '',
         start: moment('' + yearMonth + (day) + 'T16:30:00'),
         end: moment('' + yearMonth + (day) + 'T18:30:00'),
         capacity: 2
       },
       {
         id: 13,
+        title: '',
         start: moment('' + yearMonth + (day + 1) + 'T08:00:00'),
         end: moment('' + yearMonth + (day + 1) + 'T10:00:00'),
         capacity: 4
       },
       {
         id: 14,
+        title: '',
         start: moment('' + yearMonth + (day + 1) + 'T10:30:00'),
         end: moment('' + yearMonth + (day + 1) + 'T12:30:00'),
         capacity: 5
       },
       {
         id: 15,
+        title: '',
         start: moment('' + yearMonth + (day + 1) + 'T14:00:00'),
         end: moment('' + yearMonth + (day + 1) + 'T16:00:00'),
         capacity: 1
       },
       {
         id: 16,
+        title: '',
         start: moment('' + yearMonth + (day + 1) + 'T16:30:00'),
         end: moment('' + yearMonth + (day + 1) + 'T18:30:00'),
         capacity: 7

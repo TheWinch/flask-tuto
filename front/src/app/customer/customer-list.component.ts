@@ -1,8 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 
-import { Observable } from 'rxjs/Observable';
-import { concat } from 'rxjs/observable/concat';
-import { Subject } from 'rxjs/Subject';
+import { Observable, Subject, concat } from 'rxjs';
 
 import {
    debounceTime, distinctUntilChanged, switchMap, map, tap
@@ -10,7 +8,7 @@ import {
 
 import { Customer } from '../model/customer';
 import { CustomerService, SearchResult } from '../services/customer.service';
-import {MonoTypeOperatorFunction, OperatorFunction} from 'rxjs/interfaces';
+import {MonoTypeOperatorFunction, OperatorFunction} from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Router } from '@angular/router';
 import { PAGE_SIZE } from '../utils/pagination';
@@ -19,7 +17,7 @@ import { PAGE_SIZE } from '../utils/pagination';
 @Component({
   selector: 'osc-customers',
   templateUrl: './customer-list.component.html',
-  styleUrls: ['./customer-list.component.css']
+  styleUrls: ['./customer-list.component.scss']
 })
 export class CustomerListComponent implements OnInit {
   customers$: Observable<Customer[]>;

@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 
-import {Observable} from 'rxjs/Observable';
+import {Observable, of} from 'rxjs';
 
 import {Appointment, Order} from '../model/order';
 import {AppointmentService, SearchOrdersResult} from './appointment.service';
@@ -125,20 +125,20 @@ export class AppointmentServiceMock implements AppointmentService {
   }
 
   public getOrder(id: number): Observable<Order> {
-    return Observable.of(this.orders.find(order => order.id === id));
+    return of(this.orders.find(order => order.id === id));
   }
 
   public getOrders(page?: number, pageSize?: number): Observable<Order[]> {
-    return Observable.of(this.orders);
+    return of(this.orders);
   }
 
   public getOrdersByCustomer(customerId: number): Observable<Order[]> {
-    return Observable.of(this.orders);
+    return of(this.orders);
   }
 
   public searchOrders(page?: number, pageSize?: number, term?: string): Observable<SearchOrdersResult> {
     // TODO - mock filtering
-    return Observable.of({
+    return of({
       totalCount: this.orders.length,
       orders: this.orders
     });
@@ -151,11 +151,11 @@ export class AppointmentServiceMock implements AppointmentService {
       title: order.title,
       appointments: this.saveAppointments(orderId, order.appointments)
     };
-    return Observable.of(savedOrder);
+    return of(savedOrder);
   }
 
   public updateOrder(order: Order): Observable<Order> {
-    return Observable.of(order);
+    return of(order);
   }
 
 }

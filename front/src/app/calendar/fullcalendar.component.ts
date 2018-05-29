@@ -1,8 +1,10 @@
 import { Component, Input, Output, OnInit, AfterViewInit, AfterContentChecked,
   AfterViewChecked, ElementRef, EventEmitter } from '@angular/core';
-import $ from 'jquery';
+// import $ from 'jquery';
+import * as $ from 'jquery';
 import 'fullcalendar';
-import { Options } from 'fullcalendar';
+import * as locale from 'fullcalendar/src/locale';
+import { OptionsInput } from 'fullcalendar';
 
 export class ButtonClickModel {
   buttonType: string;
@@ -19,7 +21,7 @@ export class UpdateEventModel {
   template: '<div id="calendar"></div>'
 })
 export class FullCalendarComponent implements OnInit, AfterViewInit, AfterContentChecked, AfterViewChecked {
-  @Input() options: Options;
+  @Input() options: OptionsInput;
   @Output() eventDrop = new EventEmitter<any>();
   @Output() eventResize = new EventEmitter<any>();
   @Output() eventClick = new EventEmitter<any>();

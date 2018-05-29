@@ -3,10 +3,8 @@ import {MessagesComponent} from '../messages/messages.component';
 import {AppointmentService, SearchOrdersResult} from '../services/appointment.service';
 import {Appointment, Order} from '../model/order';
 import {DatePipe} from '@angular/common';
-import { Observable } from 'rxjs/Observable';
-import { concat } from 'rxjs/observable/concat';
+import { Observable, Subject, concat } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
-import { Subject } from 'rxjs/Subject';
 
 import {
   debounceTime, distinctUntilChanged, switchMap

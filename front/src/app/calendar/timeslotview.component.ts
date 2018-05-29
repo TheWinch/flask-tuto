@@ -5,7 +5,7 @@ import * as moment from 'moment';
 import {FullCalendarComponent} from './fullcalendar.component';
 import {MessagesComponent} from '../messages/messages.component';
 
-import {Options} from 'fullcalendar';
+import {OptionsInput} from 'fullcalendar';
 import {EventService} from '../services/event.service';
 import {Event} from '../model/event';
 
@@ -22,7 +22,7 @@ import {Event} from '../model/event';
     </div>`
 })
 export class TimeSlotViewComponent implements OnInit {
-  calendarOptions: Options;
+  calendarOptions: OptionsInput;
   @ViewChild(FullCalendarComponent) ucCalendar: FullCalendarComponent;
   @ViewChild(MessagesComponent) messageList: MessagesComponent;
   private readonly frozenNow = moment(new Date());
@@ -42,7 +42,7 @@ export class TimeSlotViewComponent implements OnInit {
   updateEvent(model: any): void {
     const ucCalendar = this.ucCalendar;
     this.ucCalendar.fullCalendar('unselect');
-    if (this.frozenNow.isAfter(model.event.end)) {
+    if (this.frozenNow.isBefore(model.event.end)) {
       this.eventService.updateEvent(model.event.id, model.event.start, model.event.end).subscribe(data => {
         ucCalendar.fullCalendar('refetchEvents');
       }, error => {
@@ -56,7 +56,7 @@ export class TimeSlotViewComponent implements OnInit {
   onEventDefined(model: any) {
     const ucCalendar = this.ucCalendar;
     ucCalendar.fullCalendar('unselect');
-    if (model.event.end > this.frozenNow) {
+    if (this.frozenNow.isBefore(model.event.end)) {
       const datePipe = new DatePipe('fr');
       this.eventService.createEvents([Object.assign({}, model.event, {capacity: 8})])
         .subscribe(events => {
@@ -98,8 +98,13 @@ export class TimeSlotViewComponent implements OnInit {
         start: '8:00',
         end: '19:00',
       },
+      views: {
+        agendaWeek: {
+          columnHeaderFormat: 'ddd D/M'
+        }
+      },
       events: function (start, end, timezone, callback) {
-        eventService.getEventsByDate(start, end).subscribe(data => {
+        eventService.getEventsByDate(start.toDate(), end.toDate()).subscribe(data => {
           data.forEach(e => {
             // The calendar object is shared by all the views, so we must reset any coloring (should rather be done by
             // the order view)

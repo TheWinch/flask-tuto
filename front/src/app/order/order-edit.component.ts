@@ -12,11 +12,9 @@ import { EventService } from '../services/event.service';
 import { AppointmentService } from '../services/appointment.service';
 import { CustomerService } from '../services/customer.service';
 
-import { Options } from 'fullcalendar';
-import { Observable } from 'rxjs/Observable';
-import { forkJoin } from 'rxjs/observable/forkJoin';
+import { OptionsInput } from 'fullcalendar';
+import { Observable, forkJoin, of } from 'rxjs';
 import { flatMap } from 'rxjs/operators';
-import { of } from 'rxjs/observable/of';
 import { DatePipe } from '@angular/common';
 import DateTimeFormatOptions = Intl.DateTimeFormatOptions;
 import { equalParamsAndUrlSegments } from '@angular/router/src/router_state';
@@ -30,7 +28,7 @@ import { OrderModel, EventFlipResult } from '../model/order.model';
 export class OrderEditComponent implements OnInit {
   cameFrom: string;
   title: string;
-  calendarOptions: Options;
+  calendarOptions: OptionsInput;
   private readonly frozenNow = moment(new Date());
   @ViewChild(FullCalendarComponent)
   ucCalendar: FullCalendarComponent;
@@ -64,7 +62,7 @@ export class OrderEditComponent implements OnInit {
                      this.orderModel.currentCustomerEvents.some(c => c.id === event.id));
 }
 
-  private makeCalendarOptions(): any {
+  private makeCalendarOptions(): OptionsInput {
     // solve visibility issues
     const eventService = this.eventService;
     const orderModel = this.orderModel;
@@ -97,7 +95,7 @@ export class OrderEditComponent implements OnInit {
       allDaySlot: false,
       defaultDate: orderModel.minDate,
       events: function (start, end, timezone, callback) {
-        eventService.getEventsByDate(start, end).subscribe(events => {
+        eventService.getEventsByDate(start.toDate(), end.toDate()).subscribe(events => {
           events.forEach(e => capturedThis.enrichEvent(e));
           callback(events);
         });
