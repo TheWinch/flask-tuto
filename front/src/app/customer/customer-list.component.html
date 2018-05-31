@@ -62,14 +62,13 @@
       <input #searchBox type="text"
              class="form-control"
              (keyup)="search(searchBox.value)"
-             placeholder="Filtre par nom ou email..."
-             style="width: 100%;"/>
-      <span class="input-group-btn">
+             placeholder="Filtre par nom ou email..."/>
+      <div class="input-group-append">
         <button class="btn btn-success" type="button" (click)="showCustomerCreationModal(customerCreationModal)">
           <i class="fa fa-plus-circle"></i>
           Ajouter un client
         </button>
-      </span>
+      </div>
     </div>
   </div>
   <div class="col-9">

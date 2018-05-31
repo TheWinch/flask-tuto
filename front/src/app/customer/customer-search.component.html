@@ -45,13 +45,12 @@
   <input #searchBox type="text"
                     class="form-control"
                     (keyup)="search(searchBox.value)"
-                    placeholder="Chercher un client..."
-                    style="width: 100%;"/>
-  <span class="input-group-addon" (click)="showCustomerCreationModal(customerCreationModal)">
-    <span class="mr-2 text-success">
+                    placeholder="Chercher un client..."/>
+  <div class="input-group-append" (click)="showCustomerCreationModal(customerCreationModal)">
+    <span class="mr-2 text-success input-group-text">
       <i class="fa fa-plus-circle"></i>
     </span>
-  </span>
+  </div>
 </div>
 <div class="list-group">
   <ng-container *ngFor="let customer of searchResults$ | async">

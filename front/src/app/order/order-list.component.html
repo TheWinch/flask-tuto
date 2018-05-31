@@ -5,14 +5,13 @@
       <input #searchBox type="text"
              class="form-control"
              (keyup)="search(searchBox.value)"
-             placeholder="Filtrer par client..."
-             style="width: 100%;"/>
-      <span class="input-group-btn">
+             placeholder="Filtrer par client..."/>
+      <div class="input-group-append">
         <button class="btn btn-success" type="button" (click)="createOrder()">
           <i class="fa fa-plus-circle"></i>
           Nouvelle commande
         </button>
-      </span>
+      </div>
     </div>
   </div>
   <div class="col-9">
