@@ -10,6 +10,7 @@ import {
 import { CustomerService, SearchResult } from '../services/customer.service';
 import { Customer } from '../model/customer';
 import { PAGE_SIZE } from '../utils/pagination';
+import { CustomerAddComponent } from './customer-add.component';
 
 @Component({
   selector: 'osc-customer-search',
@@ -17,9 +18,6 @@ import { PAGE_SIZE } from '../utils/pagination';
   styles: []
 })
 export class CustomerSearchComponent implements OnInit {
-  // New customer creation fields
-  newCustomer: Customer;
-
   // Emitted when the user selects or creates a customer
   @Input() public excluded: number[] = [];
   @Output() public selected: EventEmitter<Customer> = new EventEmitter<Customer>();
@@ -36,20 +34,13 @@ export class CustomerSearchComponent implements OnInit {
   constructor(private modalService: NgbModal, private customerService: CustomerService) { }
 
   ngOnInit() {
-    this.resetCustomerTemplate();
     this.getCustomers();
   }
 
-  showCustomerCreationModal(content) {
-    this.modalService.open(content, {size: 'lg'}).result.then((result) => {
-      this.customerService.createCustomer(this.newCustomer).subscribe(res => {
-        this.resetCustomerTemplate();
-        this.onSelect(res);
-      }, err => {
-        console.log('An error occured while creating the customer: ' + err);
-      });
-    }, (reason) => {
-    });
+  showCustomerCreationModal() {
+    this.modalService.open(CustomerAddComponent, {size: 'lg'}).result.then(
+      res => this.onSelect(res)
+    );
   }
 
   onSelect(customer: Customer): void {
@@ -112,14 +103,5 @@ export class CustomerSearchComponent implements OnInit {
       }),
       map((result: SearchResult) => result.customers)
     );
-  }
-
-  private resetCustomerTemplate(): void {
-    this.newCustomer = {
-      firstName: '',
-      lastName: '',
-      phone: '',
-      email: ''
-    };
   }
 }

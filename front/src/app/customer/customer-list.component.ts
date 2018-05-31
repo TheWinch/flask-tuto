@@ -8,10 +8,12 @@ import {
 
 import { Customer } from '../model/customer';
 import { CustomerService, SearchResult } from '../services/customer.service';
-import {MonoTypeOperatorFunction, OperatorFunction} from 'rxjs';
+import { MonoTypeOperatorFunction, OperatorFunction } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Router } from '@angular/router';
 import { PAGE_SIZE } from '../utils/pagination';
+import { CustomerAddComponent } from './customer-add.component';
+import { CustomerDeleteComponent } from './customer-delete.component';
 
 
 @Component({
@@ -25,10 +27,7 @@ export class CustomerListComponent implements OnInit {
   pageSize = PAGE_SIZE;
   collectionSize = 0;
   searchTerm = '';
-  newCustomer: Customer;
   private searchTerms = new Subject<string>();
-  @ViewChild('deletionModal')
-  private deletionModal: ElementRef;
 
   constructor(private modalService: NgbModal, private customerService: CustomerService,
               private router: Router) { }
@@ -40,34 +39,20 @@ export class CustomerListComponent implements OnInit {
 
   ngOnInit(): void {
     this.getCustomers();
-    this.resetCustomerTemplate();
   }
 
   showCustomerCreationModal(content) {
-    this.modalService.open(content, {size: 'lg'}).result.then((result) => {
-      this.customerService.createCustomer(this.newCustomer).subscribe(res => {
-        this.router.navigate(['customers', res.id]);
-      }, err => {
-        console.log('An error occured while creating the customer: ' + err);
-      });
-    }, (reason) => {
-    });
+    this.modalService.open(CustomerAddComponent, {size: 'lg'});
   }
 
-
   deleteCustomer(customer: Customer): void {
-    this.modalService.open(this.deletionModal, {size: 'sm'}).result.then((result) => {
-      if (result === 'confirm') {
-      console.log(result);
-          this.customerService.deleteCustomer(customer).subscribe(res => {
-          this.getCustomers();
-        }, err => {
-          console.error('An error occured while deleting the customer: ' + err);
-        });
-      }
-    }, (reason) => {
-  });
-}
+    const modalRef = this.modalService.open(CustomerDeleteComponent, {size: 'sm'});
+    modalRef.componentInstance.customer = customer;
+    modalRef.result.then(
+      (result) => this.getCustomers(),
+      (reason) => {} // the promise fails to resolve if we don't provide a callback for cancellation
+    );
+  }
 
   getCustomers(): void {
     this.customers$ = concat(
@@ -93,14 +78,5 @@ export class CustomerListComponent implements OnInit {
 
   onPageChange(newPage: number): void {
     this.getCustomers();
-  }
-
-  private resetCustomerTemplate(): void {
-    this.newCustomer = {
-      firstName: '',
-      lastName: '',
-      phone: '',
-      email: ''
-    };
   }
 }

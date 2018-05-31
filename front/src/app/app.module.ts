@@ -26,6 +26,8 @@ import { InlineEditorComponent } from './utils/inline-editor.component';
 
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
+import { CustomerAddComponent } from './customer/customer-add.component';
+import { CustomerDeleteComponent } from './customer/customer-delete.component';
 
 registerLocaleData(localeFr, 'fr');
 
@@ -66,16 +68,22 @@ registerLocaleData(localeFr, 'fr');
   declarations: [
     AppComponent,
     FullCalendarComponent,
+    MessagesComponent,
+    InlineEditorComponent,
     CustomerListComponent,
+    CustomerEditComponent,
+    CustomerAddComponent,
+    CustomerDeleteComponent,
     CustomerDetailComponent,
     TimeSlotViewComponent,
+    OrderListComponent,
     OrderEditComponent,
     OrderCustomerListComponent,
     CustomerSearchComponent,
-    OrderListComponent,
-    MessagesComponent,
-    CustomerEditComponent,
-    InlineEditorComponent
+  ],
+  entryComponents: [
+    CustomerAddComponent,
+    CustomerDeleteComponent,
   ],
   providers: [
     { provide: CustomerService, useClass: HttpCustomerService },
