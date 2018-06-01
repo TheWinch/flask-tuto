@@ -22,7 +22,6 @@
               "src/favicon.ico"
             ],
             "styles": [
-              "node_modules/fullcalendar/dist/fullcalendar.min.css",
               "node_modules/font-awesome/css/font-awesome.css",
               "src/scss/styles.scss"
             ],

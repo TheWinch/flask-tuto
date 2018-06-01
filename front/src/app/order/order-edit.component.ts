@@ -39,17 +39,17 @@ export class OrderEditComponent implements OnInit {
   private formatEvent(event: Event, isSelectedBySomeone: boolean, isForCurrentCustomer: boolean): void {
     let backgroundColor = '';
     if (event.end.isBefore(this.frozenNow)) {
-      backgroundColor = isForCurrentCustomer ? 'lightgrey' : 'grey';
+      backgroundColor = isForCurrentCustomer ? 'event-lightgrey' : 'event-grey';
     } else if (isForCurrentCustomer) {
-      backgroundColor = '#20c997';
+      backgroundColor = 'event-current';
     } else if (event.capacity === 0) {
-      backgroundColor = 'grey';
+      backgroundColor = 'event-grey';
     } else if (isSelectedBySomeone) {
-      backgroundColor = '#5bc0de';
+      backgroundColor = 'event-used';
     }
 
     Object.assign(event, {
-      backgroundColor: backgroundColor,
+      className: [backgroundColor],
     });
   }
 
@@ -140,6 +140,9 @@ export class OrderEditComponent implements OnInit {
     const removedEventIds = this.orderModel.removeCustomer(customer);
     removedEventIds.forEach(id => {
       const event = this.ucCalendar.fullCalendar('clientEvents', id)[0];
+      if (event === undefined) {
+        return;
+      }
       event.capacity = event.capacity + 1;
       this.formatEvent(event, this.orderModel.containsEvent(id),
                        this.orderModel.currentCustomerEvents.some(c => c.id === event.id));

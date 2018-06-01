@@ -29,13 +29,13 @@ export class TimeSlotViewComponent implements OnInit {
 
   private static colorEvent(event: Event, now: moment.Moment): string {
     if (event.used === event.capacity || now.isAfter(event.end)) {
-      return 'grey';
+      return 'event-grey';
     } else if (event.used === event.capacity - 1) {
-      return 'red';
+      return 'event-red';
     } else if (event.used > event.capacity / 2) {
-      return 'orange';
+      return 'event-orange';
     } else  {
-      return 'green';
+      return 'event-green';
     }
   }
 
@@ -109,8 +109,7 @@ export class TimeSlotViewComponent implements OnInit {
             // The calendar object is shared by all the views, so we must reset any coloring (should rather be done by
             // the order view)
             Object.assign(e, {
-              borderColor: '',
-              backgroundColor: TimeSlotViewComponent.colorEvent(e, now),
+              className: [TimeSlotViewComponent.colorEvent(e, now)],
               title: e.used + '/' + e.capacity + ' client' + (e.used !== 1 ? 's' : '')
           });
           });
